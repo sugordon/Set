@@ -27,6 +27,14 @@ public class Board implements Iterable<Card> {
 		board[row][col] = c;
 	}
 	
+	public int size() {
+		return cards;
+	}
+	
+	public Card get(int row, int col) {
+		return board[row][col];
+	}
+	
 	public void remove(int row, int col) {
 		if (cards == 0) {
 			System.err.println("Tried to remove empty cell");
@@ -65,6 +73,23 @@ public class Board implements Iterable<Card> {
 				}
 				return retCard;
 			}};
+	}
+	@Override
+	public String toString() {
+		String s = "";
+		for (int i = 0; i < 7; i++) {
+			for (int j = 0; j < 3; j++) {
+				Card c = this.get(i, j);
+				if (c != null) {
+					s += this.get(i, j).toString() + " ";
+				}
+				else {
+					s += "null ";
+				}
+			}
+			s += System.lineSeparator();
+		}
+		return s;
 	}
 
 }
