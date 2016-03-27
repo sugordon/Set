@@ -1,18 +1,13 @@
 package network;
 
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Base64;
-import java.util.Properties;
-
-import com.mysql.jdbc.SQLError;
 
 public class Database {
 	/** The name of the MySQL account to use (or empty for anonymous) */
@@ -21,20 +16,8 @@ public class Database {
 	/** The password for the MySQL account (or empty for anonymous) */
 	private static final String password = "guessme1";
 
-	/** The name of the computer running MySQL */
-	private final String serverName = "199.98.20.115";
-
-	/** The port of the MySQL server (default is 3306) */
-	private final int portNumber = 3306;
-
-	/** The name of the database we are testing with (this default is installed with MySQL) */
-	private final String dbName = "SetGame";
-	
-	/** The name of the table we are testing with */
-	private final String tableName = "Users";
-	
 	private static String hash(String s) {
-		MessageDigest md = null;
+		MessageDigest md;
 		String ret = null;
 		try {
 			md = MessageDigest.getInstance("SHA-1");
@@ -72,11 +55,11 @@ public class Database {
 				"SELECT hash FROM Users WHERE name = '" +
 				name + "'";
 		System.out.println(cmd);
-		ResultSet rs = null;
-		String stored = null;
+		ResultSet rs;
+		String stored;
 		try {
-			rs = Database.executeQuerey(Database.getConnection(), cmd);
-			if (rs.first()) {
+			rs = Database.executeQuery(Database.getConnection(), cmd);
+			if (rs != null && rs.first()) {
 				stored = rs.getString("hash");
 			} else {
 				System.out.println("User Not Found");
@@ -89,37 +72,10 @@ public class Database {
 		System.out.println(hash);
 		System.out.println(stored);
 		System.out.println(hash.equals(stored));
-		if (hash.equals(stored)) {
-			return true;
-		}
-		return false;
-	}
-	
-	public static boolean changePass(String name, String oldPass, String newPass) {
-		String oldHash = Database.hash(oldPass);
-		String newHash = Database.hash(newPass);
-		String cmd =
-				"SELECT hash FROM Users WHERE name = '" +
-				name + "'";
-		System.out.println(cmd);
-		ResultSet rs = null;
-		String stored = null;
-		try {
-			rs = Database.executeQuerey(Database.getConnection(), cmd);
-			if (rs.first()) {
-				stored = rs.getString("hash");
-			} else {
-				System.out.println("User Not Found");
-				return false;
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return false;
-		}
-		return true;
+		return hash.equals(stored);
 	}
 
-	public static Connection getConnection() throws SQLException {
+	private static Connection getConnection() throws SQLException {
 //		Connection conn = null;
 //		Properties connectionProps = new Properties();
 //		connectionProps.put("user", Database.userName);
@@ -133,14 +89,14 @@ public class Database {
 //		return conn;
 	}
 
-	public static void executeUpdate(Connection conn, String command) throws SQLException {
-	    Statement stmt = null;
+	private static void executeUpdate(Connection conn, String command) throws SQLException {
+	    Statement stmt;
 		stmt = conn.createStatement();
 		stmt.executeUpdate(command);
 	}
 	
-	public static ResultSet executeQuerey(Connection conn, String command) {
-	    Statement stmt = null;
+	private static ResultSet executeQuery(Connection conn, String command) {
+	    Statement stmt;
 		try {
 			stmt = conn.createStatement();
 			return stmt.executeQuery(command);
@@ -152,8 +108,7 @@ public class Database {
 	}
 	
 	public static void main(String[] args) {
-		Database db = new Database();
-		db.newUser("HIHI", "asdf");
-		db.auth("HIHI", "f");
+		Database.newUser("HIHI", "asdf");
+		Database.auth("HIHI", "f");
 	}
 }
