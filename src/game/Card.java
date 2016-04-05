@@ -1,6 +1,8 @@
 package game;
 
-public class Card {
+import javax.swing.*;
+
+public class Card extends JToggleButton{
 	final int number;
 	final int symbol;
 	final int shading;

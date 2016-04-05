@@ -2,14 +2,23 @@ package Client;
 
 import javax.swing.*;
 import javax.swing.plaf.BorderUIResource;
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.io.*;
+import java.util.Random;
+
+import game.Card;
 
 /**
  * Created by Bridget on 3/15/2016.
  */
 public class GUI {
+
+    // Toggle button so it grays out when pressed
+    public static game.Card [] cards = new game.Card[64];     //Array of cards, in a grid
+
     private static void createAndShowBoard() {
         JFrame gameboard = new JFrame("SET");
         gameboard.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -25,14 +34,10 @@ public class GUI {
         cardspace.setMaximumSize(cardspacesize);
         cardspace.setPreferredSize(cardspacesize);
 
-        // BufferedImage buttonicon = ImageIO.read(new("buttonIconPath"));
-        //card1.setBorder(BorderFactory.createEmptyBorder());
-        //card1.setContentAreaFilled(false);
+        generateCards(cards);
 
-        // Toggle button so it grays out when pressed
-        JToggleButton [] cards = new JToggleButton[12];     //Array of cards, in a grid
+        //I need to be given which cards should be displayed
         for(int i = 0; i < 12; i++) {
-            cards[i] = new JToggleButton();
             cards[i].setVisible(true);
             cards[i].setPreferredSize(new Dimension(20,20));
             cards[i].addActionListener(new ActionListener() {
@@ -62,6 +67,24 @@ public class GUI {
         gameboard.setVisible(true);
     }
 
+    public static void generateCards(game.Card [] cards) {
+        try {
+            for(int i = 0; i < 64; i++) {
+                File f = new File("src/Images/0000.png");
+                Image img = ImageIO.read(f);
+                //Image img = ImageIO.read("src/Images/" + cards[i].toString() + ".png");
+                cards[i].setIcon(new ImageIcon(img));
+                //BufferedImage buttonicon = ImageIO.read(new("buttonIconPath"));
+                cards[i].setBorder(BorderFactory.createEmptyBorder());
+                cards[i].setContentAreaFilled(false);
+            }
+        }catch (IOException ex) {
+                ex.printStackTrace();
+            }
+
+        //return cards;
+    }
+
     private static void createAndShowLogin() {
         JFrame loginscreen = new JFrame("Welcome to SET!");
         loginscreen.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -78,6 +101,7 @@ public class GUI {
     }
 
     public static void main(String[] args){
+        //generateCards();
         javax.swing.SwingUtilities.invokeLater(new Runnable(){
             public void run() {
                 createAndShowBoard();
