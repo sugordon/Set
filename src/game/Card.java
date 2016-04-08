@@ -15,7 +15,7 @@ public class Card {
 	
 	@Override
 	public int hashCode() {
-		return 1000*this.number + 100*this.symbol + 10*this.shading + 1*this.color;
+		return 1000*this.number + 100*this.symbol + 10*this.shading + this.color;
 	}
 	
 	@Override

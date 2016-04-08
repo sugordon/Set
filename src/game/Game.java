@@ -26,6 +26,18 @@ public class Game {
 	private int lock = -1;
 	private Timer lockTimer;
 
+	private String gameName;
+    private Player owner;
+    private int maxPlayers;
+    private String pwd;
+
+	public Game(String name, Player owner, int numPlayers, String pwd) {
+        this.gameName = name;
+        this.owner = owner;
+        this.maxPlayers = numPlayers;
+        this.pwd = pwd;
+        players.add(owner);
+	}
 	public Game(int seed, int numPlayers) {
 		Game.createDeck(seed, deck);
 		deal(12);
