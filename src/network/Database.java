@@ -8,7 +8,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Base64;
-import java.util.Collections;
 
 public class Database {
 	/** The name of the MySQL account to use (or empty for anonymous) */
