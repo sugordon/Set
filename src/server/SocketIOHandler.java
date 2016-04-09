@@ -2,6 +2,7 @@ package server;
 
 import java.net.*;
 import java.io.*;
+import network.Database;
 
 public class SocketIOHandler{
 
@@ -31,20 +32,28 @@ public class SocketIOHandler{
                 break;
             case LOGIN:
                 if(s[0].equals("LOGIN")){
+                    if(Database.auth(s[1],s[2])) {
+                        output = "ACK_LOGIN,SUCCESS,LOBBY";
+                        state = LOBBY;
+                        ServerInit.allThreads.put(s[1], _thread);
+                    }
+                    else {
+                        output = "ACK_LOGIN,FAILURE,LOGIN";
+                    }
                     //s[1] contains username
                     //s[2] contains password (in plaintext for now; may implement encryption later)
-                    //TODO authenticate user (confirm username exists in db, passwords match, and not already logged in)
-                    //TODO add to active thread hashmap with username as key
-                    //TODO send login confirmation to client e.g. "ACK_LOGIN,SUCCESS,LOBBY" or "ACK_LOGIN,FAILURE,LOGIN"
-                    //TODO change state of thread to LOBBY
                 }
                 else if(s[0].equals("REGISTER")){
+                    if(Database.newUser(s[1],s[2])){
+                        output = "ACK_REGISTER,SUCCESS,LOGIN";
+                        state = LOGIN;
+                    }
                     //TODO confirm username doesnt exist
                     //TODO add username to db if it doesnt exist
                     //TODO send registration confirmation to client e.g. "ACK_REGISTER,SUCCESS,LOGIN" or "ACK_REGISTER,FAILURE,LOGIN"
                     //TODO do NOT change state of thread.  User must log in again
                 }
-                else output = "BAD_VALUE";    //invalid data received from
+                else output = "BAD_VALUE,LOGIN";    //invalid data received from
                 break;
             case LOBBY:
                 if(s[0].equals("CREATE")){
