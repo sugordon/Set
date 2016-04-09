@@ -168,4 +168,13 @@ public class GUIGame {
     private void submitSet(){
 
     }
+
+    public void updateCards(Card cards[], boolean [] remove){
+
+    }
+
+    //If there isn't a valid set, the size of the board grid has to increase
+    public void updateGrid(){
+
+    }
 }
