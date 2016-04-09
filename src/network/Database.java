@@ -71,8 +71,13 @@ public class Database {
 		return hash.equals(stored);
 	}
 
-	public static Connection getConnection() throws SQLException {
-		return DriverManager.getConnection("jdbc:mysql://199.98.20.115/SetGame", Database.userName, Database.password);
+	public static Connection getConnection() {
+		try {
+			return DriverManager.getConnection("jdbc:mysql://199.98.20.115/SetGame", Database.userName, Database.password);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	private static void executeUpdate(Connection conn, String command) throws SQLException {
