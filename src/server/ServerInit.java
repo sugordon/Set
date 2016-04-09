@@ -3,17 +3,18 @@ package server;
 import java.net.*;
 import java.io.*;
 import java.util.concurrent.ConcurrentHashMap;
-import game.*;
+import game.Game;
 
 public class ServerInit{
 
     ServerSocket server_socket = null;
     boolean listening;
     int PORT = 7100;
-
+    static ConcurrentHashMap<String, ServerMultiThread> allThreads;
+    static ConcurrentHashMap<String, Game> gameRooms;
     public ServerInit(){
-        ConcurrentHashMap<String, ServerMultiThread> allThreads = new ConcurrentHashMap<String, ServerMultiThread>();
-        ConcurrentHashMap<String, Game> gameRooms = new ConcurrentHashMap<String, Game>();
+        allThreads = new ConcurrentHashMap<String, ServerMultiThread>();
+        gameRooms = new ConcurrentHashMap<String, Game>();
 
         try {
             server_socket = new ServerSocket(PORT);
