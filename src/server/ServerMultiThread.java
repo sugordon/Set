@@ -8,8 +8,8 @@ public class ServerMultiThread extends Thread {
     private Socket socket;
     public PrintWriter outStream;
     public BufferedReader inStream;
-    public Player current_player;
-    public Game current_game;
+    private Player current_player;
+    private Game current_game;
 
     private SocketIOHandler io;
 
@@ -17,6 +17,22 @@ public class ServerMultiThread extends Thread {
         super("ServerMultiThread");
         socket = s;
         io = new SocketIOHandler(this);
+    }
+
+    public void setPlayer(Player p) {
+        this.current_player = p;
+    }
+
+    public void setGame(Game g) {
+        this.current_game = g;
+    }
+
+    public Game getGame() {
+        return current_game;
+    }
+
+    public Player getPlayer() {
+        return current_player;
     }
 
     public void run(){

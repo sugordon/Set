@@ -4,6 +4,9 @@ import java.net.*;
 import java.io.*;
 import java.util.concurrent.ConcurrentHashMap;
 import game.Game;
+import network.Database;
+
+import java.sql.Connection;
 
 public class ServerInit{
 
@@ -11,10 +14,13 @@ public class ServerInit{
     boolean listening;
     int PORT = 7100;
     static ConcurrentHashMap<String, ServerMultiThread> allThreads;
+    //Indexed by name of the game
     static ConcurrentHashMap<String, Game> gameRooms;
+    public static Connection conn;
     public ServerInit(){
         allThreads = new ConcurrentHashMap<String, ServerMultiThread>();
         gameRooms = new ConcurrentHashMap<String, Game>();
+        conn = Database.getConnection();
 
         try {
             server_socket = new ServerSocket(PORT);
