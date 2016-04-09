@@ -3,6 +3,8 @@
  */
 package game;
 
+import network.Database;
+
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,16 +23,26 @@ import javax.swing.Timer;
 public class Game {
 	private ArrayList<Card> deck = new ArrayList<Card>(81);
 	private Board board = new Board();
-	private HashSet<CardSet> allSets = new HashSet<CardSet>();
-	private ArrayList<Player> players = new ArrayList<Player>();
-	private int lock = -1;
+    private ArrayList<Player> players = new ArrayList<Player>();
+    private int lock = -1;
+    private HashSet<CardSet> allSets = new HashSet<CardSet>();
 	private Timer lockTimer;
 
-	public Game(int seed, int numPlayers) {
-		Game.createDeck(seed, deck);
+	private final String gameName;
+    private final Player owner;
+    private final int maxPlayers;
+
+    private final String pwd;
+
+	public Game(String name, Player owner, int numPlayers, String pwd) {
+        this.gameName = name;
+        this.owner = owner;
+        this.maxPlayers = numPlayers;
+        this.pwd = pwd;
+        players.add(owner);
+
+        this.createDeck(deck);
 		deal(12);
-		System.out.println(board);
-		System.out.println(allSets.size());
 		while (allSets.size() == 0) {
 			deal(3);
 		}
@@ -45,10 +57,9 @@ public class Game {
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-					players.get(lock).score--;
+					players.get(lock).increment(-1);
 					lock = -1;
 					System.out.println("Lock Reset");
-					return;
 				}
 			});
 		lockTimer.setRepeats(false);
@@ -94,12 +105,12 @@ public class Game {
 			while (allSets.size() == 0) {
 				deal(3);
 			}
-			players.get(playerNum).score++;
+			players.get(playerNum).increment(1);
 			lock = -1;
 			lockTimer.stop();
 			return true;
 		}
-		players.get(playerNum).score--;
+		players.get(playerNum).increment(-1);
 		return false;
 	}
 	
@@ -128,7 +139,7 @@ public class Game {
 		}
 	}
 	
-	public static void createDeck(int seed, ArrayList<Card> deck) {
+	public void createDeck(ArrayList<Card> deck) {
 		deck.clear();
 		int[] vals = {0, 0, 0, 0};
 		//Initialize the Deck
@@ -146,14 +157,43 @@ public class Game {
 		}
 		//Collections.shuffle(deck);
 		//Always shuffle the same
-		Collections.shuffle(deck, new Random(seed));
+		Collections.shuffle(deck);
 	}
 
-	/**
-	 * @param args
-	 */
+    public ArrayList<Card> getDeck() {
+        return deck;
+    }
+
+    public Board getBoard() {
+        return board;
+    }
+
+    public ArrayList<Player> getPlayers() {
+        return players;
+    }
+
+    public int getLock() {
+        return lock;
+    }
+
+    public String getGameName() {
+        return gameName;
+    }
+
+    public Player getOwner() {
+        return owner;
+    }
+
+    public int getMaxPlayers() {
+        return maxPlayers;
+    }
+
+    public String getPwd() {
+        return pwd;
+    }
+
 	public static void main(String[] args) {
-		Game game = new Game(50, 1);
+		Game game = new Game("game", new Player("Gordon"), 5, Database.hash("1234"));
 		Scanner s = new Scanner(System.in);
 		System.out.println("Removing");
 		int[] one = 	{0, 1};
@@ -173,5 +213,4 @@ public class Game {
 		}
 		s.close();
 	}
-
 }
