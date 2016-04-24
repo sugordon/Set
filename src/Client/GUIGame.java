@@ -1,22 +1,19 @@
 package Client;
 
-import javax.swing.*;
-import javax.swing.plaf.BorderUIResource;
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.BufferedImage;
-import java.beans.PropertyChangeListener;
-import java.io.*;
-import java.util.Random;
-
-import game.Board;
 import game.Card;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by Bridget on 3/15/2016.
  */
-public class GUIGame {
+public class GUIGame extends JPanel{
 
     // Toggle button so it grays out when pressed
     public game.Card [] cards = new game.Card[81];     //Array of cards, in a grid
