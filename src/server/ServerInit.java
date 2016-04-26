@@ -21,6 +21,7 @@ public class ServerInit{
         allThreads = new ConcurrentHashMap<String, ServerMultiThread>();
         gameRooms = new ConcurrentHashMap<String, Game>();
         conn = Database.getConnection();
+        listening = true;
 
         try {
             server_socket = new ServerSocket(PORT);

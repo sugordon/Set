@@ -38,7 +38,7 @@ public class SocketIOHandler{
                     if(Database.auth(s[1],s[2])) {
                         output = "ACK_LOGIN,SUCCESS,LOBBY";
                         state = LOBBY;
-                        _thread.setPlayer(new Player(s[1]));
+                        _thread.setPlayer(s[1]);
                         ServerInit.allThreads.put(s[1], _thread);
                     }
                     else {
@@ -49,6 +49,7 @@ public class SocketIOHandler{
                 }
                 else if(s[0].equals("REGISTER")) {
                     state = LOGIN;
+                    System.out.println("Register request");
                     switch (Database.newUser(s[1], s[2])) {
                         case 0:
                             output = "ACK_REGISTER,SUCCESS,LOGIN";
@@ -71,7 +72,7 @@ public class SocketIOHandler{
                         int num = Integer.parseInt(s[2]);
                         Game g = new Game(s[1], _thread.getPlayer(), num, s[3]);
                         _thread.setGame(g);
-                        ServerInit.gameRooms.put(g.getGameName(), g);
+                        ServerInit.gameRooms.put(s[1], g);
                         output = "ACK_CREATE,SUCCESS," + s[1] + ",ROOM";
                         state = ROOM;
                     }
@@ -89,8 +90,23 @@ public class SocketIOHandler{
 
                 break;
             case GAME:
-                //Game
-
+                Game g = _thread.getGame();
+                if (s[0] == "GAME_START") {
+                    output = "ACK_START,"+g.getGameName()+","+g.getPlayers()+","+g.getBoard()+",GAME";
+                }
+                if (s[0] == "UPDATE") {
+                    output = "ACK_UPDATE,UPDATE,GAME";
+                }
+                //s[1] contains the player number of the lock
+                if (s[0] == "LOCK") {
+                    g.lock(Integer.parseInt(s[1]));
+                    output = "ACK_LOCK,"+g.getLock()+",GAME";
+                }
+                //s[1], s[2], s[3] contains the three cards, s[4] contains the player number
+                if (s[0] == "REPLACE") {
+                    boolean success = g.replace(s[1], s[2], s[3], Integer.parseInt(s[4]));
+                    output = "ACK_REPLACE,"+success+","+g.getBoard()+",GAME";
+                }
                 break;
 
             default:
