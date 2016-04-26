@@ -66,7 +66,8 @@ public class GUILogin extends JPanel{
 
         passwordText.setBounds(100, 40, 160, 25);
         loginButton.setBounds(10, 80, 80, 25);
-        registerButton.setBounds(100, 80, 80, 25);
+        loginscreen.getRootPane().setDefaultButton(loginButton);
+        registerButton.setBounds(100, 80, 100, 25);
 
         addLoginAndRegisterListeners();
 
@@ -78,10 +79,10 @@ public class GUILogin extends JPanel{
         loginscreen.add(userText);
         loginscreen.add(passwordText);
 
-        loginscreen.pack();
+
 
         loginscreen.setVisible(true);
-
+        loginscreen.pack();
     }
 
     public String getUN(){
