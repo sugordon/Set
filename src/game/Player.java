@@ -11,6 +11,20 @@ public class Player {
         return score;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public boolean equals(Object p) {
+        return p instanceof Player && ((Player)p).getName() == this.getName();
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getName().hashCode();
+    }
+
     public void increment(int s) {
         score += s;
     }

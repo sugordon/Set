@@ -8,8 +8,8 @@ public class ServerMultiThread extends Thread {
     private Socket socket;
     public PrintWriter outStream;
     public BufferedReader inStream;
-    public Player current_player;
-    public Game current_game;
+    private String current_player;
+    private Game current_game;
 
     private SocketIOHandler io;
 
@@ -19,6 +19,22 @@ public class ServerMultiThread extends Thread {
         io = new SocketIOHandler(this);
     }
 
+    public void setPlayer(String p) {
+        this.current_player = p;
+    }
+
+    public void setGame(Game g) {
+        this.current_game = g;
+    }
+
+    public Game getGame() {
+        return current_game;
+    }
+
+    public String getPlayer() {
+        return current_player;
+    }
+
     public void run(){
         try {
             outStream = new PrintWriter(socket.getOutputStream(), true);
@@ -26,20 +42,35 @@ public class ServerMultiThread extends Thread {
 
             String out, in;
             out = "INIT_CONN";
+            System.out.println("TEST2");
             outStream.println(out);
-
+            System.out.println("TEST0");
             while ((in = inStream.readLine()) != null) {
+                System.out.println("WHILE");
                 out = io.processInput(in);
-                if (out.equals("END_CONN"))
+                if (out.equals("END_CONN")) {
+                    this.close();
                     break;
+                }
                 outStream.println(out);
             }
-            outStream.close();
-            inStream.close();
-            socket.close();
+            System.out.println("TEST");
+
         }
         catch(IOException e){
             System.out.println("IO exception!");
+            this.close();
+            e.printStackTrace();
+        }
+    }
+
+    private void close() {
+        ServerInit.allThreads.remove(this.current_player);
+        outStream.close();
+        try {
+            inStream.close();
+            socket.close();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

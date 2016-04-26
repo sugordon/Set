@@ -29,17 +29,17 @@ public class Game {
 	private Timer lockTimer;
 
 	private final String gameName;
-    private final Player owner;
+    private final String owner;
     private final int maxPlayers;
 
     private final String pwd;
 
-	public Game(String name, Player owner, int numPlayers, String pwd) {
+	public Game(String name, String owner, int numPlayers, String pwd) {
         this.gameName = name;
         this.owner = owner;
         this.maxPlayers = numPlayers;
         this.pwd = pwd;
-        players.add(owner);
+        players.add(new Player(owner));
 
         this.createDeck(deck);
 		deal(12);
@@ -96,8 +96,11 @@ public class Game {
 		lockTimer.start();
 		return true;
 	}
-	
-	public boolean replace(int[] one, int[] two, int[] three, int playerNum) {
+
+	public boolean replace(String sOne, String sTwo, String sThree, int playerNum) {
+        int[] one = {sOne.charAt(0), sOne.charAt(1)};
+        int[] two = {sTwo.charAt(0), sTwo.charAt(1)};
+        int[] three = {sThree.charAt(0), sThree.charAt(1)};
 		if (playerNum != lock)
 			return false;
 		if (remove(one, two, three)) {
@@ -172,6 +175,14 @@ public class Game {
         return players;
     }
 
+	public void addPlayer(String p) {
+		this.players.add(new Player(p));
+	}
+
+	public void kickPlayer(String p) {
+		this.players.remove(new Player(p));
+	}
+
     public int getLock() {
         return lock;
     }
@@ -180,7 +191,7 @@ public class Game {
         return gameName;
     }
 
-    public Player getOwner() {
+    public String getOwner() {
         return owner;
     }
 
@@ -193,12 +204,12 @@ public class Game {
     }
 
 	public static void main(String[] args) {
-		Game game = new Game("game", new Player("Gordon"), 5, Database.hash("1234"));
+		Game game = new Game("game", "Gordon", 5, Database.hash("1234"));
 		Scanner s = new Scanner(System.in);
 		System.out.println("Removing");
-		int[] one = 	{0, 1};
-		int[] two = 	{0, 0};
-		int[] three = 	{2, 0};
+        String one =    "01";
+        String two =    "00";
+        String three =  "20";
 		System.out.println(game.board.get(0, 1));
 		game.lock(0);
 		game.replace(one, two, three, 0);

@@ -30,11 +30,15 @@ public class Board implements Iterable<Card> {
 	public int size() {
 		return cards;
 	}
-	
+
 	public Card get(int row, int col) {
 		return board[row][col];
 	}
-	
+
+	public int getMaxRow() {
+		return maxRow;
+	}
+
 	public void remove(int row, int col) {
 		if (cards == 0) {
 			System.err.println("Tried to remove empty cell");

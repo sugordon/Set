@@ -28,14 +28,14 @@ public class Database {
 		return ret;
 	}
 
-	public static int newUser(Connection conn, String name, String hash) {
+	public static int newUser(String name, String hash) {
 		String cmd =
 				"INSERT INTO Users" +
 				"(name, hash) VALUES ('" +
 				name + "', '" + hash + "')";
 		System.out.println(cmd);
 		try {
-			Database.executeUpdate(conn, cmd);
+			Database.executeUpdate(server.ServerInit.conn, cmd);
 		} catch (SQLException e) {
 			//Error code for duplicate Username
 			if (e.getErrorCode() == 1062) {
@@ -49,7 +49,7 @@ public class Database {
 		return 0;
 	}
 	
-	public static boolean auth(Connection conn, String name, String hash) {
+	public static boolean auth(String name, String hash) {
 		String cmd =
 				"SELECT hash FROM Users WHERE name = '" +
 				name + "'";
@@ -57,7 +57,7 @@ public class Database {
 		ResultSet rs;
 		String stored;
 		try {
-			rs = Database.executeQuery(conn, cmd);
+			rs = Database.executeQuery(server.ServerInit.conn, cmd);
 			if (rs != null && rs.first()) {
 				stored = rs.getString("hash");
 			} else {
@@ -89,5 +89,4 @@ public class Database {
 	    Statement stmt = conn.createStatement();
         return stmt.executeQuery(command);
 	}
-	
 }

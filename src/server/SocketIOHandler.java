@@ -2,6 +2,9 @@ package server;
 
 import java.net.*;
 import java.io.*;
+
+import game.Game;
+import game.Player;
 import network.Database;
 
 public class SocketIOHandler{
@@ -35,6 +38,7 @@ public class SocketIOHandler{
                     if(Database.auth(s[1],s[2])) {
                         output = "ACK_LOGIN,SUCCESS,LOBBY";
                         state = LOBBY;
+                        _thread.setPlayer(s[1]);
                         ServerInit.allThreads.put(s[1], _thread);
                     }
                     else {
@@ -43,39 +47,66 @@ public class SocketIOHandler{
                     //s[1] contains username
                     //s[2] contains password (in plaintext for now; may implement encryption later)
                 }
-                else if(s[0].equals("REGISTER")){
-                    if(Database.newUser(s[1],s[2])){
-                        output = "ACK_REGISTER,SUCCESS,LOGIN";
-                        state = LOGIN;
+                else if(s[0].equals("REGISTER")) {
+                    state = LOGIN;
+                    System.out.println("Register request");
+                    switch (Database.newUser(s[1], s[2])) {
+                        case 0:
+                            output = "ACK_REGISTER,SUCCESS,LOGIN";
+                            break;
+                        case 1:
+                            output = "ACK_REGISTER,FAILURE,LOGIN";
+                            break;
+                        case 2:
+                            output = "ACK_REGISTER,EXISTS,LOGIN";
+                            break;
                     }
-                    //TODO confirm username doesnt exist
-                    //TODO add username to db if it doesnt exist
-                    //TODO send registration confirmation to client e.g. "ACK_REGISTER,SUCCESS,LOGIN" or "ACK_REGISTER,FAILURE,LOGIN"
-                    //TODO do NOT change state of thread.  User must log in again
                 }
                 else output = "BAD_VALUE,LOGIN";    //invalid data received from
                 break;
             case LOBBY:
-                if(s[0].equals("CREATE")){
+                //List of all games
+                if(s[0].equals("CREATE")) {
+                    //Current user does not have a game, assumes all input is valid
+                    if (_thread.getGame() == null) {
+                        int num = Integer.parseInt(s[2]);
+                        Game g = new Game(s[1], _thread.getPlayer(), num, s[3]);
+                        _thread.setGame(g);
+                        ServerInit.gameRooms.put(s[1], g);
+                        output = "ACK_CREATE,SUCCESS," + s[1] + ",ROOM";
+                        state = ROOM;
+                    }
+                    else {
+                        output = "ACK_CREATE,FAILURE,GAME";
+                        state = LOBBY;
+                    }
                     //s[1] contains room/game name
                     //s[2] contains max_players - default = 4; max = 30 (so whole class can play at once)
                     //s[3] contains password (optional)
-                    //TODO confirm that user does not have an existing game
-                    //TODO if user already has an active game:
-                        // notify client that game already exists e.g. "ACK_CREATE,FAILURE,GAME_EXISTS,LOBBY"
-                    //TODO if user does not have an active game:
-                        // attempt to create game
-                        // if successful, send confirmation and (maybe) room/game id, e.g. "ACK_CREATE,SUCCESS,game1,ROOM"
-                            // change state of thread to ROOM
-                        // if unsuccessful, send confirmation and failure notice e.g. "ACK_CREATE,FAILURE,BAD_NAME,LOBBY"
-                            // leave state of thread as LOBBY
                 }
                 break;
             case ROOM:
+                //Waiting screen for game
 
                 break;
             case GAME:
-
+                Game g = _thread.getGame();
+                if (s[0] == "GAME_START") {
+                    output = "ACK_START,"+g.getGameName()+","+g.getPlayers()+","+g.getBoard()+",GAME";
+                }
+                if (s[0] == "UPDATE") {
+                    output = "ACK_UPDATE,UPDATE,GAME";
+                }
+                //s[1] contains the player number of the lock
+                if (s[0] == "LOCK") {
+                    g.lock(Integer.parseInt(s[1]));
+                    output = "ACK_LOCK,"+g.getLock()+",GAME";
+                }
+                //s[1], s[2], s[3] contains the three cards, s[4] contains the player number
+                if (s[0] == "REPLACE") {
+                    boolean success = g.replace(s[1], s[2], s[3], Integer.parseInt(s[4]));
+                    output = "ACK_REPLACE,"+success+","+g.getBoard()+",GAME";
+                }
                 break;
 
             default:
