@@ -1,4 +1,4 @@
-package client;
+package Client;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -40,11 +40,13 @@ public class ClientInit {
             System.exit(1);
         }
     }
-    public static void startGUI(){
-        //TODO Brigdet needs to enter the code here to start the GUI1
+/*    public static void startGUI(){
+        GUILogin login = new GUILogin();
+        login.createAndShowLogin();
     }
+*/
     public static void main(String[] args) {
-        startGUI();
+        //startGUI();
         initConn();
     }
 

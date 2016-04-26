@@ -1,7 +1,12 @@
 package Client;
 
 import javax.swing.*;
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.awt.*;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusListener;
+import java.security.MessageDigest;
 
 /**
  * Created by Bridget on 4/9/2016.
@@ -36,7 +41,7 @@ public class GUILogin extends JPanel{
     };
 
     //Constructor
-    public createAndShowLogin(){
+    public void createAndShowLogin(){
         buildLogin();
     }
 
@@ -53,6 +58,7 @@ public class GUILogin extends JPanel{
         userLabel.setBounds(10, 10, 80, 25);
         add(userLabel);
 
+        JTextField userText = new JTextField();
         userText.setBounds(100, 10, 160, 25);
         add(userText);
 
@@ -60,6 +66,7 @@ public class GUILogin extends JPanel{
         passwordLabel.setBounds(10, 40, 80, 25);
         add(passwordLabel);
 
+        JTextField passwordText = new JTextField();
         passwordText.setBounds(100, 40, 160, 25);
         add(passwordText);
 
@@ -75,7 +82,7 @@ public class GUILogin extends JPanel{
         loginscreen.setVisible(true);
     }
 
-    public String getUN(){
+/*    public String getUN(){
         return userText.getText();
     }
 
@@ -101,4 +108,5 @@ public class GUILogin extends JPanel{
         userText.removeFocusListener(UNFocus);
         passwordText.removeFocusListener(passFocus);
     }
+*/
 }

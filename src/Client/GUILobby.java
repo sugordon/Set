@@ -1,20 +1,23 @@
 package Client;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  * Created by Bridget on 4/23/2016.
  */
 
 public class GUILobby extends JPanel{
-
+/*
     public JFrame lobby = new JFrame("Lobby");
 
     private JPanel games = new JPanel();
-    private JPanel scoreboard = new JPanel;
+    private JPanel scoreboard = new JPanel();
 
-    private JTable gameList = new JTable;
+    private JTable gameList = new JTable();
 
     private JButton refreshGameButton = new JButton("Refresh");
     public JButton createGameButton = new JButton("Create Game");
@@ -26,7 +29,7 @@ public class GUILobby extends JPanel{
     private JTextField passField = new JTextField();    //game password
     private int myID;
 
-    public createLobby(int uid){
+    public void createLobby(int uid){
         lobby.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         lobby.getContentPane().setBackground(new Color(51, 255, 255));
@@ -37,8 +40,8 @@ public class GUILobby extends JPanel{
 
         games.setLayout(new BoxLayout(games, BoxLayout.Y_AXIS));
 
-        gameModel = new DefaultTableModel(gameData, gameColumns);
-        gameTable = new JTable(gameModel) {
+        DefaultTableModel gameModel = new DefaultTableModel(gameData, gameColumns);
+        JTable gameTable = new JTable(gameModel) {
             @Override
             public boolean isCellEditable(int r, int c) {return false;}
         };
@@ -81,7 +84,7 @@ public class GUILobby extends JPanel{
 
     }
 
-    private JPanel getGameCreationPanel(){
+    /*private JPanel getGameCreationPanel(){
         JPanel temp = new JPanel();
         temp.add(Box.createRigidArea(new Dimension(0,20)));
         temp.add(Box.createRigidArea(new Dimension(20,0)));
@@ -97,4 +100,6 @@ public class GUILobby extends JPanel{
         temp.add(createGame);
         return temp;
     }
+    */
+
 }
