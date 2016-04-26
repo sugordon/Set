@@ -1,0 +1,43 @@
+package client;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+
+/**
+ * Created by vkuruturi on 4/9/16.
+ */
+public class ClientInit {
+
+    public static final int INIT  = 0;          //start of connection
+    public static final int LOGIN = 1;          //login or register new account
+    public static final int LOBBY = 2;          //lobby with list of games
+    public static final int ROOM  = 3;          //pregame and postgame lobby
+    public static final int GAME  = 4;          //in-game
+
+    private static String HOST = "sable06.ee.cooper.edu";
+    private static int PORT = 7100;
+    private static Socket sck;
+
+    public static int STATE;
+    public static BufferedReader outStream;
+    public static PrintWriter inStream;
+
+    public static void initConn(){
+        try{
+            sck = new Socket(HOST,PORT);
+        }
+        catch (IOException e){
+            e.printStackTrace();
+            outStream = new PrintWriter(sck.getOutputStream(),true);
+            inStream = new BufferedReader(new InputStreamReader(sck.getInputStream()));
+        }
+    }
+
+    public static void main(String[] args) {
+
+    }
+
+}
