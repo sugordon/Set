@@ -3,6 +3,7 @@ package Client;
 import javax.swing.*;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusListener;
@@ -51,8 +52,7 @@ public class GUILogin extends JPanel{
         loginscreen.setLayout(null);
         loginscreen.getContentPane().setBackground(new Color(51, 255, 255));
         loginscreen.setPreferredSize(new Dimension(1000, 700));
-        loginscreen.setResizable(false);
-        loginscreen.pack();
+        //loginscreen.setResizable(false);
 
         JLabel userLabel = new JLabel("Username");
         userLabel.setBounds(10, 10, 80, 25);
@@ -65,12 +65,12 @@ public class GUILogin extends JPanel{
         loginscreen.add(passwordLabel);
 
         passwordText.setBounds(100, 40, 160, 25);
-
-
         loginButton.setBounds(10, 80, 80, 25);
-        loginscreen.add(loginButton);
-
         registerButton.setBounds(100, 80, 80, 25);
+
+        addLoginAndRegisterListeners();
+
+        loginscreen.add(loginButton);
         loginscreen.add(registerButton);
 
         userText.addFocusListener(UNFocus);
@@ -78,8 +78,10 @@ public class GUILogin extends JPanel{
         loginscreen.add(userText);
         loginscreen.add(passwordText);
 
+        loginscreen.pack();
 
         loginscreen.setVisible(true);
+
     }
 
     public String getUN(){
@@ -87,17 +89,34 @@ public class GUILogin extends JPanel{
     }
 
     public String getPass(){
-        try{
+        /*try{
             MessageDigest md = MessageDigest.getInstance("SHA");
             return new String((new HexBinaryAdapter()).marshal(md.digest(new String(passwordText.getPassword()).getBytes())));
         } catch (Exception e) {
             return null;
         }
+        */
+        return passwordText.getText();
     }
 
-    public void addListeners(ActionListener login, ActionListener reg) {
-        loginButton.addActionListener(login);
-        registerButton.addActionListener(reg);
+    public void addLoginAndRegisterListeners() {
+        loginButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String username = getUN();
+                String password = getPass();
+                //ClientInit.inStream.println()
+                JOptionPane.showConfirmDialog((Component) e.getSource(), username + "\n" + password);
+            }
+        });
+        registerButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String username = getUN();
+                String password = getPass();
+                JOptionPane.showConfirmDialog((Component) e.getSource(), username + "\n" + password);
+            }
+        });
     }
 
     public void detachListeners() {
@@ -108,5 +127,4 @@ public class GUILogin extends JPanel{
         userText.removeFocusListener(UNFocus);
         passwordText.removeFocusListener(passFocus);
     }
-
 }
