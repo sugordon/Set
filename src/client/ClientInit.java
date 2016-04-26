@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 /**
  * Created by vkuruturi on 4/9/16.
@@ -34,10 +35,17 @@ public class ClientInit {
             outStream = new PrintWriter(sck.getOutputStream(),true);
             inStream = new BufferedReader(new InputStreamReader(sck.getInputStream()));
         }
+        catch (UnknownHostException e){
+            System.err.println("Cannot resolve host " + HOST);
+            System.exit(1);
+        }
     }
-
+    public static void startGUI(){
+        //TODO Brigdet needs to enter the code here to start the GUI1
+    }
     public static void main(String[] args) {
-
+        startGUI();
+        initConn();
     }
 
 }
