@@ -30,23 +30,32 @@ public class ClientInit {
         try{
             sck = new Socket(HOST,PORT);
         }
-        catch (IOException e){
-            e.printStackTrace();
-            outStream = new PrintWriter(sck.getOutputStream(),true);
-            inStream = new BufferedReader(new InputStreamReader(sck.getInputStream()));
-        }
         catch (UnknownHostException e){
             System.err.println("Cannot resolve host " + HOST);
             System.exit(1);
         }
+        catch (IOException e){
+            e.printStackTrace();
+            try {
+                inStream = new PrintWriter(sck.getOutputStream(),true);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+            try {
+                outStream = new BufferedReader(new InputStreamReader(sck.getInputStream()));
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+        }
+
     }
-/*    public static void startGUI(){
+    public static void startGUI(){
         GUILogin login = new GUILogin();
         login.createAndShowLogin();
     }
-*/
+
     public static void main(String[] args) {
-        //startGUI();
+        startGUI();
         initConn();
     }
 

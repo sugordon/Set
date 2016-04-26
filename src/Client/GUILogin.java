@@ -15,8 +15,8 @@ public class GUILogin extends JPanel{
 
     private JButton loginButton = new JButton("Login");
     private JButton registerButton = new JButton("Register");
-    private JTextField UNField = new JTextField("Enter Username");
-    private JPasswordField passfield = new JPasswordField();
+    private JTextField userText = new JTextField("Enter Username");
+    private JPasswordField passwordText = new JPasswordField();
 
     private FocusListener UNFocus = new FocusAdapter() {
         public void focusGained(java.awt.event.FocusEvent evt) {
@@ -48,7 +48,7 @@ public class GUILogin extends JPanel{
     private void buildLogin() {
         JFrame loginscreen = new JFrame("Welcome to SET!");
         loginscreen.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+        loginscreen.setLayout(null);
         loginscreen.getContentPane().setBackground(new Color(51, 255, 255));
         loginscreen.setPreferredSize(new Dimension(1000, 700));
         loginscreen.setResizable(false);
@@ -56,33 +56,33 @@ public class GUILogin extends JPanel{
 
         JLabel userLabel = new JLabel("Username");
         userLabel.setBounds(10, 10, 80, 25);
-        add(userLabel);
+        loginscreen.add(userLabel);
 
-        JTextField userText = new JTextField();
         userText.setBounds(100, 10, 160, 25);
-        add(userText);
 
         JLabel passwordLabel = new JLabel("Password");
         passwordLabel.setBounds(10, 40, 80, 25);
-        add(passwordLabel);
+        loginscreen.add(passwordLabel);
 
-        JTextField passwordText = new JTextField();
         passwordText.setBounds(100, 40, 160, 25);
-        add(passwordText);
+
 
         loginButton.setBounds(10, 80, 80, 25);
-        add(loginButton);
+        loginscreen.add(loginButton);
 
-        registerButton.setBounds(180, 80, 80, 25);
-        add(registerButton);
+        registerButton.setBounds(100, 80, 80, 25);
+        loginscreen.add(registerButton);
 
         userText.addFocusListener(UNFocus);
         passwordText.addFocusListener(passFocus);
+        loginscreen.add(userText);
+        loginscreen.add(passwordText);
+
 
         loginscreen.setVisible(true);
     }
 
-/*    public String getUN(){
+    public String getUN(){
         return userText.getText();
     }
 
@@ -108,5 +108,5 @@ public class GUILogin extends JPanel{
         userText.removeFocusListener(UNFocus);
         passwordText.removeFocusListener(passFocus);
     }
-*/
+
 }
