@@ -7,7 +7,7 @@ public class Card extends JToggleButton{
 	final int symbol;
 	final int shading;
 	final int color;
-	
+
 	public Card(int num, int sym, int sha, int col) {
 		this.number = num;
 		this.symbol = sym;
@@ -17,7 +17,7 @@ public class Card extends JToggleButton{
 	
 	@Override
 	public int hashCode() {
-		return 1000*this.number + 100*this.symbol + 10*this.shading + 1*this.color;
+		return 1000*this.number + 100*this.symbol + 10*this.shading + this.color;
 	}
 	
 	@Override

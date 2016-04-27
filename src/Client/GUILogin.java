@@ -1,7 +1,10 @@
 package Client;
 
 import javax.swing.*;
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.awt.*;
+import java.awt.event.*;
+import java.security.MessageDigest;
 
 /**
  * Created by Bridget on 4/9/2016.
@@ -10,8 +13,8 @@ public class GUILogin extends JPanel{
 
     private JButton loginButton = new JButton("Login");
     private JButton registerButton = new JButton("Register");
-    private JTextField UNField = new JTextField("Enter Username");
-    private JPasswordField passfield = new JPasswordField();
+    private JTextField userText = new JTextField("Enter Username");
+    private JPasswordField passwordText = new JPasswordField();
 
     private FocusListener UNFocus = new FocusAdapter() {
         public void focusGained(java.awt.event.FocusEvent evt) {
@@ -36,43 +39,53 @@ public class GUILogin extends JPanel{
     };
 
     //Constructor
-    public createAndShowLogin(){
+    public void createAndShowLogin(){
         buildLogin();
     }
 
     private void buildLogin() {
         JFrame loginscreen = new JFrame("Welcome to SET!");
         loginscreen.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+        loginscreen.setLayout(null);
         loginscreen.getContentPane().setBackground(new Color(51, 255, 255));
         loginscreen.setPreferredSize(new Dimension(1000, 700));
-        loginscreen.setResizable(false);
-        loginscreen.pack();
+        //loginscreen.setResizable(false);
 
         JLabel userLabel = new JLabel("Username");
         userLabel.setBounds(10, 10, 80, 25);
-        add(userLabel);
+        loginscreen.add(userLabel);
 
         userText.setBounds(100, 10, 160, 25);
-        add(userText);
 
         JLabel passwordLabel = new JLabel("Password");
         passwordLabel.setBounds(10, 40, 80, 25);
-        add(passwordLabel);
+        loginscreen.add(passwordLabel);
 
         passwordText.setBounds(100, 40, 160, 25);
-        add(passwordText);
-
         loginButton.setBounds(10, 80, 80, 25);
-        add(loginButton);
+        loginscreen.getRootPane().setDefaultButton(loginButton);
+        registerButton.setBounds(100, 80, 100, 25);
 
-        registerButton.setBounds(180, 80, 80, 25);
-        add(registerButton);
+        addLoginAndRegisterListeners();
+
+        loginscreen.add(loginButton);
+        loginscreen.add(registerButton);
 
         userText.addFocusListener(UNFocus);
         passwordText.addFocusListener(passFocus);
+        loginscreen.add(userText);
+        loginscreen.add(passwordText);
+
+        loginscreen.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                //TODO: Add proper exit behavior
+                super.windowClosing(e);
+            }
+        });
 
         loginscreen.setVisible(true);
+        loginscreen.pack();
     }
 
     public String getUN(){
@@ -80,17 +93,34 @@ public class GUILogin extends JPanel{
     }
 
     public String getPass(){
-        try{
+        /*try{
             MessageDigest md = MessageDigest.getInstance("SHA");
             return new String((new HexBinaryAdapter()).marshal(md.digest(new String(passwordText.getPassword()).getBytes())));
         } catch (Exception e) {
             return null;
         }
+        */
+        return passwordText.getText();
     }
 
-    public void addListeners(ActionListener login, ActionListener reg) {
-        loginButton.addActionListener(login);
-        registerButton.addActionListener(reg);
+    public void addLoginAndRegisterListeners() {
+        loginButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String username = getUN();
+                String password = getPass();
+                //ClientInit.inStream.println()
+                JOptionPane.showConfirmDialog((Component) e.getSource(), username + "\n" + password);
+            }
+        });
+        registerButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String username = getUN();
+                String password = getPass();
+                JOptionPane.showConfirmDialog((Component) e.getSource(), username + "\n" + password);
+            }
+        });
     }
 
     public void detachListeners() {
