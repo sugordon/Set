@@ -205,7 +205,7 @@ public class Game {
 
 	@Override
 	public String toString() {
-		return this.getGameName() + "," + this.getOwner() + "," + this.getPlayers().size() + "," + this.getMaxPlayers() + ",";
+		return this.getGameName() + "," + this.getOwner() + "," + this.getPlayers().size() + "," + this.getMaxPlayers() + ":";
 	}
 
 	public static void main(String[] args) {

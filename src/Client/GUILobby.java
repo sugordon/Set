@@ -6,6 +6,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 
 /**
  * Created by Bridget on 4/23/2016.
@@ -168,6 +169,18 @@ public class GUILobby extends JPanel{
     };
 
     private void update_game_list(Object[][] gameData){
+        System.out.println("HIHI");
+        ClientInit.inStream.println("GAMES");
+        System.out.println("SENT");
+        String s = null;
+        try {
+            while ((s = ClientInit.outStream.readLine()) == null);
+        } catch (IOException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Loading Games");
+        }
+        System.out.println(s);
+
         //GORDON FILL IN
         gameModel = new DefaultTableModel(gameData, gameColumnLabels);
         gameTable.setModel(gameModel);

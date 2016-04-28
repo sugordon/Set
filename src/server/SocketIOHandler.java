@@ -66,7 +66,7 @@ public class SocketIOHandler{
                 break;
             case LOBBY:
                 if (s[0].equals("GAMES")) {
-                    output = "ACK_GAMES,SUCCESS,";
+                    output = "ACK_GAMES,SUCCESS:";
                     for (Game g : ServerInit.gameRooms.values()) {
                         output +=  g.toString();
                     }
