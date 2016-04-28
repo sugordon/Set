@@ -12,6 +12,7 @@ import java.security.MessageDigest;
  */
 public class GUILogin extends JPanel{
 
+    public JFrame loginscreen;
     private JButton loginButton = new JButton("Login");
     private JButton registerButton = new JButton("Register");
     private JTextField userText = new JTextField("Enter Username");
@@ -45,7 +46,7 @@ public class GUILogin extends JPanel{
     }
 
     private void buildLogin() {
-        JFrame loginscreen = new JFrame("Welcome to SET!");
+        loginscreen = new JFrame("Welcome to SET!");
         loginscreen.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         loginscreen.setLayout(null);
         loginscreen.getContentPane().setBackground(new Color(51, 255, 255));

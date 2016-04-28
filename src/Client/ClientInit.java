@@ -94,13 +94,29 @@ public class ClientInit {
     public static void startGUI(){
         login = new GUILogin();
         login.createAndShowLogin();
+        lobby = new GUILobby();
+//        lobby.createLobby(10);
     }
 
     public static void switchStates(int current, int next){
         STATE = next;
+        switch(next){
+            case LOGIN:
+                login.setVisible(true);
+                break;
+            case LOBBY:
+//                lobby.lobby.setVisible(true);
+                break;
+            case ROOM:
+                game.setVisible(true);
+                break;
+            case GAME:
+                game.setVisible(true);
+        }
+
         switch(current){
             case LOGIN:
-                login.setVisible(false);
+                login.loginscreen.dispose();
                 break;
             case LOBBY:
                 lobby.setVisible(false);
@@ -113,19 +129,6 @@ public class ClientInit {
                 break;
         }
 
-        switch(next){
-            case LOGIN:
-                login.setVisible(true);
-                break;
-            case LOBBY:
-                lobby.setVisible(true);
-                break;
-            case ROOM:
-                game.setVisible(true);
-                break;
-            case GAME:
-                game.setVisible(true);
-        }
 
     }
 
