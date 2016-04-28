@@ -203,6 +203,11 @@ public class Game {
         return pwd;
     }
 
+	@Override
+	public String toString() {
+		return this.getGameName() + "," + this.getOwner() + "," + this.getPlayers().size() + "," + this.getMaxPlayers() + ",";
+	}
+
 	public static void main(String[] args) {
 		Game game = new Game("game", "Gordon", 5, Database.hash("1234"));
 		Scanner s = new Scanner(System.in);
