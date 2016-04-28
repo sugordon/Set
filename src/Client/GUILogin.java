@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.security.MessageDigest;
 
 /**
@@ -45,7 +46,7 @@ public class GUILogin extends JPanel{
 
     private void buildLogin() {
         JFrame loginscreen = new JFrame("Welcome to SET!");
-        loginscreen.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        loginscreen.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         loginscreen.setLayout(null);
         loginscreen.getContentPane().setBackground(new Color(51, 255, 255));
         loginscreen.setPreferredSize(new Dimension(1000, 700));
@@ -109,8 +110,9 @@ public class GUILogin extends JPanel{
             public void actionPerformed(ActionEvent e) {
                 String username = getUN();
                 String password = getPass();
-                //ClientInit.inStream.println()
-                JOptionPane.showConfirmDialog((Component) e.getSource(), username + "\n" + password);
+                ClientInit.inStream.println("LOGIN," + username + "," + password);
+                processResponse(e);
+
             }
         });
         registerButton.addActionListener(new ActionListener() {
@@ -118,7 +120,8 @@ public class GUILogin extends JPanel{
             public void actionPerformed(ActionEvent e) {
                 String username = getUN();
                 String password = getPass();
-                JOptionPane.showConfirmDialog((Component) e.getSource(), username + "\n" + password);
+                ClientInit.inStream.println("REGISTER," + username + "," + password);
+                processResponse(e);
             }
         });
     }
@@ -131,4 +134,50 @@ public class GUILogin extends JPanel{
         userText.removeFocusListener(UNFocus);
         passwordText.removeFocusListener(passFocus);
     }
+
+    private String processResponse(ActionEvent e){
+        String response = null;
+        try {
+            while((response = ClientInit.outStream.readLine()) != null){
+                String[] tokens = response.split("\\s*,\\s*");
+                System.out.println(response );
+                if(tokens[0] == "BAD_VALUE"){
+                    //TODO
+                }
+                else if(tokens[0].equals("ACK_REGISTER")) {
+                    if (tokens[1].equals("SUCCESS")) {
+                        response = "Successfully Regi)stered.  Please log in";
+                        JOptionPane.showMessageDialog((Component) e.getSource(), response);
+                    } else if (tokens[1].equals("FAILURE")){
+                        response = "Unable to register.  Please try again";
+                        JOptionPane.showMessageDialog((Component) e.getSource(), response);
+                    }
+                    else if (tokens[1].equals("EXISTS")) {
+                        response = "Unable to register. Username already exists";
+                        JOptionPane.showMessageDialog((Component) e.getSource(), response);
+                    }
+                }
+                else if(tokens[0].equals("ACK_LOGIN")){
+                    if(tokens[1].equals("FAILURE")) {
+                        response = "Unable to login.  Please try again.";
+                        JOptionPane.showMessageDialog((Component) e.getSource(), response);
+                    }
+                    if(tokens[1].equals("SUCCESS")){
+                        if (tokens[2].equals("LOBBY")){
+                            ClientInit.STATE = ClientInit.LOBBY;
+                            ClientInit.switchStates(ClientInit.LOGIN,ClientInit.LOBBY);
+                        }
+                    }
+                }
+                break;
+
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        return response;
+    }
+
+
 }

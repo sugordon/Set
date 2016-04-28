@@ -18,13 +18,21 @@ public class ClientInit {
     public static final int ROOM  = 3;          //pregame and postgame lobby
     public static final int GAME  = 4;          //in-game
 
+    public static int STATE = 0;
+
     private static String HOST = "sable06.ee.cooper.edu";
     private static int PORT = 7100;
     private static Socket sck;
 
-    public static int STATE;
     public static BufferedReader outStream;
     public static PrintWriter inStream;
+
+    public static String response = null;
+
+    public static GUILogin login;
+    public static GUILobby lobby;
+    public static GUIGame  game;
+
 
     public static void initConn(){
         try{
@@ -36,7 +44,7 @@ public class ClientInit {
         }
         catch (IOException e){
             e.printStackTrace();
-            try {
+           /* try {
                 inStream = new PrintWriter(sck.getOutputStream(),true);
             } catch (IOException e1) {
                 e1.printStackTrace();
@@ -46,17 +54,84 @@ public class ClientInit {
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
+            */
+        }
+
+        try {
+            inStream = new PrintWriter(sck.getOutputStream(),true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            outStream = new BufferedReader(new InputStreamReader(sck.getInputStream()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            while((response = outStream.readLine()) != null) {
+                if (response.equals("INIT_CONN")) {
+                    inStream.println("INIT");
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try{
+            while((response = outStream.readLine())!= null){
+                if(response.equals("ACK_CONN,LOGIN")) {
+                    STATE = LOGIN;
+                    break;
+                }
+            }
+        } catch (IOException e){
+            e.printStackTrace();
         }
 
     }
     public static void startGUI(){
-        GUILogin login = new GUILogin();
+        login = new GUILogin();
         login.createAndShowLogin();
     }
 
+    public static void switchStates(int current, int next){
+        STATE = next;
+        switch(current){
+            case LOGIN:
+                login.setVisible(false);
+                break;
+            case LOBBY:
+                lobby.setVisible(false);
+                break;
+            case ROOM:
+                game.setVisible(false);
+                break;
+            case GAME:
+                game.setVisible(false);
+                break;
+        }
+
+        switch(next){
+            case LOGIN:
+                login.setVisible(true);
+                break;
+            case LOBBY:
+                lobby.setVisible(true);
+                break;
+            case ROOM:
+                game.setVisible(true);
+                break;
+            case GAME:
+                game.setVisible(true);
+        }
+
+    }
+
     public static void main(String[] args) {
-        startGUI();
         initConn();
+        startGUI();
     }
 
 }

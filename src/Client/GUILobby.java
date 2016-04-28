@@ -13,7 +13,7 @@ import java.awt.event.WindowEvent;
  */
 
 public class GUILobby extends JPanel{
-    public JFrame lobby = new JFrame("Lobby");
+/*    public JFrame lobby = new JFrame("Lobby");
 
     private JPanel games = new JPanel();
     private JPanel scoreboard = new JPanel();
@@ -120,5 +120,6 @@ public class GUILobby extends JPanel{
         temp.add(createGameButton);
         return temp;
     }
+    */
 
 }
