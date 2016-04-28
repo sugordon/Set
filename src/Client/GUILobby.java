@@ -12,11 +12,9 @@ import java.awt.event.*;
  */
 
 public class GUILobby extends JPanel{
-/*    public JFrame lobby = new JFrame("Lobby");
+    public JFrame lobby = new JFrame("Lobby");
 
     private JPanel games = new JPanel();
-    private JPanel users = new JPanel();
-    private JPanel scoreboard = new JPanel();
     private JPanel theOneTruePanel = new JPanel(new GridLayout(1,1,0,0));
 
     //private JTable userTable;
@@ -37,18 +35,8 @@ public class GUILobby extends JPanel{
 
     public int selectedRow;
 
-    String[] userColumns = {"Name",
-            "Ranking"};
     String[] gameColumnLabels = {"Name",
             "Players"};
-
-    /*
-    Object[][] userData = {                                                     //swap for Player.getName, and Player.getScore
-            {"TheM3owLord", new Integer(1)},
-            {"GSu32", new Integer(3)},
-            {"AlpacaFloof", new Integer(2)}
-    };
-    */
 
     Object[][] gameData = {                                                     //swap for Game.getGameName, and Game.getPlayers? and Game.getMaxPlayers?
             {"Meow Mix Cafe", "2/2"},
@@ -57,7 +45,6 @@ public class GUILobby extends JPanel{
     };
 
     DefaultTableModel gameModel = new DefaultTableModel(gameData, gameColumnLabels);
-    //DefaultTableModel userModel = new DefaultTableModel(userData, userColumns);
 
     public void createLobby(String uid){
         lobby.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -69,10 +56,9 @@ public class GUILobby extends JPanel{
         this.myID = uid;
 
         games.setLayout(new BoxLayout(games, BoxLayout.Y_AXIS));
-        //users.setLayout(new BoxLayout(users, BoxLayout.Y_AXIS));
 
         //Game Section
-        JTable gameTable = new JTable(gameModel) {
+        gameTable = new JTable(gameModel) {
             @Override
             public boolean isCellEditable(int r, int c) {return false;}
         };
@@ -85,46 +71,22 @@ public class GUILobby extends JPanel{
         games.add(gamesLabel);
         games.add(scrollPane);
 
-        JPanel temp = new JPanel();
-        temp.add(refreshGameButton);
-        temp.add(createGameButton);
-        temp.setAlignmentX(Component.CENTER_ALIGNMENT);
-        temp.setMaximumSize(new Dimension(200, 10));
-        games.add(temp);
-        add(games, BorderLayout.SOUTH);
+        add(refreshGameButton);
+        add(createGameButton);
+        setAlignmentX(Component.CENTER_ALIGNMENT);
+        setMaximumSize(new Dimension(200, 10));
 
+        add(games, BorderLayout.SOUTH);
+        games.setVisible(true);
         addListeners();
         passField.addFocusListener(passFocus);
         nameField.addFocusListener(nameFocus);
 
         //The one actual panel where everything appears
         theOneTruePanel.setBorder(BorderFactory.createLineBorder(new Color(51, 255, 255)));
-        //info.setBackground(new Color(159, 94, 230));
         theOneTruePanel.add(getGamePanel((String) gameTable.getModel().getValueAt(selectedRow, 1)));
         add(theOneTruePanel, BorderLayout.CENTER);
 
-        /*
-        //Scoreboard Section
-        userTable = new JTable(userModel) {
-            @Override //Disable editing
-            public boolean isCellEditable(int r, int c) {return false;}
-        };
-        formatTable(userTable);
-        JScrollPane scrollPane2 = new JScrollPane(userTable);
-        scrollPane2.setPreferredSize(new Dimension(200, 200));
-        JLabel usersLabel = new JLabel("Users Online");
-        usersLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        refreshScoreboard.setAlignmentX(Component.CENTER_ALIGNMENT);
-        users.add(usersLabel);
-        users.add(scrollPane2);
-        temp = new JPanel();
-        temp.add(refreshScoreboard);
-        temp.add(logoutButton);
-        temp.setAlignmentX(Component.CENTER_ALIGNMENT);
-        temp.setMaximumSize(new Dimension(200, 10));
-        users.add(temp);
-        add(users, BorderLayout.EAST);
-        */
 
         refreshGameButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
@@ -151,6 +113,9 @@ public class GUILobby extends JPanel{
                 create_game(myID, gameName, password, 5);
             }
         });
+        lobby.add(this);
+        setVisible(true);
+        theOneTruePanel.setVisible(true);
     }
 
     private void addListeners(){
@@ -251,7 +216,7 @@ public class GUILobby extends JPanel{
         temp.add(createGameButton2);
         return temp;
     }
-    */
+
 
     public String getGameName(){
         return nameField.getText();
@@ -263,7 +228,6 @@ public class GUILobby extends JPanel{
 
     private void formatTable(JTable t) {
         t.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        t.removeColumn(t.getColumnModel().getColumn(0));
         t.getColumnModel().getColumn(0).setPreferredWidth(140);
         t.getColumnModel().getColumn(1).setPreferredWidth(60);
         t.setAutoCreateRowSorter(true);

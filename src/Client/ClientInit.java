@@ -95,7 +95,7 @@ public class ClientInit {
         login = new GUILogin();
         login.createAndShowLogin();
         lobby = new GUILobby();
-//        lobby.createLobby(10);
+        lobby.createLobby("ALPACAS");
     }
 
     public static void switchStates(int current, int next){
@@ -105,7 +105,7 @@ public class ClientInit {
                 login.setVisible(true);
                 break;
             case LOBBY:
-//                lobby.lobby.setVisible(true);
+                lobby.lobby.setVisible(true);
                 break;
             case ROOM:
                 game.setVisible(true);
