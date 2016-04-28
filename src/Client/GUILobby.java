@@ -7,6 +7,8 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by Bridget on 4/23/2016.
@@ -36,16 +38,18 @@ public class GUILobby extends JPanel{
 
     public int selectedRow;
 
-    String[] gameColumnLabels = {"Name",
-            "Players"};
+    String[] gameColumnLabels = {"Game Name", "Owner", "Players", "Max Players"};
 
-    Object[][] gameData = {                                                     //swap for Game.getGameName, and Game.getPlayers? and Game.getMaxPlayers?
-            {"Meow Mix Cafe", "2/2"},
-            {"Alpaca Picnic", "2/5"},
-            {"The Set World Championship", "1/5"}
-    };
+    ArrayList<Object[]> gameData = new ArrayList<>();
 
-    DefaultTableModel gameModel = new DefaultTableModel(gameData, gameColumnLabels);
+//    Object[][] gameData = {                                                     //swap for Game.getGameName, and Game.getPlayers? and Game.getMaxPlayers?
+//            {"Meow Mix Cafe", "2/2"},
+//            {"Alpaca Picnic", "2/5"},
+//            {"The Set World Championship", "1/5"}
+//    };
+
+//    DefaultTableModel gameModel = new DefaultTableModel(gameData, gameColumnLabels);
+    DefaultTableModel gameModel = new DefaultTableModel();
 
     public void createLobby(String uid){
         lobby.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -59,6 +63,13 @@ public class GUILobby extends JPanel{
         games.setLayout(new BoxLayout(games, BoxLayout.Y_AXIS));
 
         //Game Section
+
+        Object[][] gd = {
+                {"Meow Mix Cafe", "Venkat", "2", "2"},
+                {"Alpaca Picnic", "Vanket", "2", "5"},
+                {"The Set World Championship", "Venkat", "1", "5"}
+        };
+        DefaultTableModel gameModel = new DefaultTableModel(gd, gameColumnLabels);
         gameTable = new JTable(gameModel) {
             @Override
             public boolean isCellEditable(int r, int c) {return false;}
@@ -82,6 +93,8 @@ public class GUILobby extends JPanel{
         addListeners();
         passField.addFocusListener(passFocus);
         nameField.addFocusListener(nameFocus);
+        passField.setPreferredSize(new Dimension(160, 25));
+        nameField.setPreferredSize(new Dimension(160, 25));
 
         //The one actual panel where everything appears
         theOneTruePanel.setBorder(BorderFactory.createLineBorder(new Color(51, 255, 255)));
@@ -109,7 +122,7 @@ public class GUILobby extends JPanel{
         createGameButton2.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String gameName = getName();
+                String gameName = nameField.getText();
                 String password = getPass();
                 create_game(myID, gameName, password, 5);
             }
@@ -117,6 +130,7 @@ public class GUILobby extends JPanel{
         lobby.add(this);
         setVisible(true);
         theOneTruePanel.setVisible(true);
+        this.update_game_list(gameData);
     }
 
     private void addListeners(){
@@ -168,7 +182,7 @@ public class GUILobby extends JPanel{
         }
     };
 
-    private void update_game_list(Object[][] gameData){
+    private void update_game_list(ArrayList<Object[]> gameData){
         System.out.println("HIHI");
         ClientInit.inStream.println("GAMES");
         System.out.println("SENT");
@@ -177,23 +191,47 @@ public class GUILobby extends JPanel{
             while ((s = ClientInit.outStream.readLine()) == null);
         } catch (IOException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Loading Games");
+            JOptionPane.showMessageDialog(null, "Error loading Games");
         }
         System.out.println(s);
 
         //GORDON FILL IN
-        gameModel = new DefaultTableModel(gameData, gameColumnLabels);
+        String[] sents = s.split(":");
+        for (String sent : Arrays.copyOfRange(sents, 1, sents.length-1)) {
+            String[] toks = sent.split(",");
+            gameData.add(sent.split(","));
+        }
+        Object tmp[][] = new Object[gameData.size()][4];
+        tmp = gameData.toArray(tmp);
+        gameModel = new DefaultTableModel(tmp, gameColumnLabels);
         gameTable.setModel(gameModel);
         formatTable(gameTable);
     }
 
     private void disconnect_from_server(){
-        //GORODON FILL IN
+        try {
+            ClientInit.sck.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         //After you log out, takes you back to login screen
     }
 
     private void create_game(String uid, String game_name, String game_password, int max_users){
-
+        System.out.println(game_name);
+        if (game_name == null) {
+            JOptionPane.showMessageDialog(null, "Null game name");
+            return;
+        }
+        ClientInit.inStream.println("CREATE,"+game_name+","+max_users+","+game_password);
+        String s = null;
+        try {
+            while ((s = ClientInit.outStream.readLine()) == null);
+        } catch (IOException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error creating game");
+        }
+        System.out.println(s);
     }
 
     public void resetTheOneTruePanel() {

@@ -70,6 +70,9 @@ public class SocketIOHandler{
                     for (Game g : ServerInit.gameRooms.values()) {
                         output +=  g.toString();
                     }
+                    if (ServerInit.gameRooms.size() == 0) {
+                        output += ":";
+                    }
                     output += "ROOM";
                 }
                 //List of all games
