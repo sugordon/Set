@@ -23,9 +23,9 @@ import javax.swing.Timer;
 public class Game {
 	private ArrayList<Card> deck = new ArrayList<Card>(81);
 	private Board board = new Board();
-    private ArrayList<Player> players = new ArrayList<Player>();
+    private ArrayList<Player> players = new ArrayList<>();
     private int lock = -1;
-    private HashSet<CardSet> allSets = new HashSet<CardSet>();
+    private HashSet<CardSet> allSets = new HashSet<>();
 	private Timer lockTimer;
 
 	private final String gameName;
@@ -98,9 +98,9 @@ public class Game {
 	}
 
 	public boolean replace(String sOne, String sTwo, String sThree, int playerNum) {
-        int[] one = {sOne.charAt(0), sOne.charAt(1)};
-        int[] two = {sTwo.charAt(0), sTwo.charAt(1)};
-        int[] three = {sThree.charAt(0), sThree.charAt(1)};
+        Card one = new Card(sOne);
+        Card two = new Card(sTwo);
+        Card three = new Card(sThree);
 		if (playerNum != lock)
 			return false;
 		if (remove(one, two, three)) {
@@ -117,26 +117,22 @@ public class Game {
 		return false;
 	}
 	
-	private boolean remove(int[] one, int[] two, int[] three) {
-		Card card1 = board.get(one[0], one[1]);
-		Card card2 = board.get(two[0], two[1]);
-		Card card3 = board.get(three[0], three[1]);
+	private boolean remove(Card card1, Card card2, Card card3) {
 		if (!CardSet.isSet(card1, card2, card3)) {
 			return false;
 		}
-		remove(one);
-		remove(two);
-		remove(three);
+		remove(card1);
+		remove(card2);
+		remove(card3);
 		return true;
 	}
 	
-	private void remove(int[] loc) {
-		Card removeCard = board.get(loc[0], loc[1]);
-		board.remove(loc[0], loc[1]);
+	private void remove(Card loc) {
+		board.remove(loc);
 		for (Iterator<CardSet> i = allSets.iterator(); i.hasNext();) {
 		    CardSet element = i.next();
-		    if (element.contains(removeCard)) {
-		    	System.out.println(removeCard + " removing " + element);
+		    if (element.contains(loc)) {
+		    	System.out.println(loc + " removing " + element);
 		    	i.remove();
 		    }
 		}
