@@ -4,6 +4,7 @@ import game.Card;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,8 +22,22 @@ public class GUIGame extends JPanel{
     public JFrame gameboard = new JFrame("SET");
 
     public JPanel cardspace = new JPanel();
+    private JPanel scoreboard = new JPanel();
 
     public JButton setButton = new JButton("SET");
+    private JButton refreshScoreboard = new JButton("Refresh");
+
+
+    String[] userColumns = {"Name",
+            "Ranking"};
+
+    Object[][] userData = {                                                     //swap for Player.getName, and Player.getScore
+            {"TheM3owLord", new Integer(1)},
+            {"GSu32", new Integer(3)},
+            {"AlpacaFloof", new Integer(2)}
+    };
+
+    DefaultTableModel userModel = new DefaultTableModel(userData, userColumns);
 
     private Timer timer = new Timer(1000, null);
     private int t;
@@ -80,6 +95,7 @@ public class GUIGame extends JPanel{
         gameboard.add(cardspace, c);
 
         gameboard.setVisible(true);
+
     }
 
     public void createCardSpace(){
@@ -174,4 +190,32 @@ public class GUIGame extends JPanel{
     public void updateGrid(){
 
     }
+
+    private void formatTable(JTable t) {
+        t.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        t.removeColumn(t.getColumnModel().getColumn(0)); //hide IDs
+        t.getColumnModel().getColumn(0).setPreferredWidth(140);
+        t.getColumnModel().getColumn(1).setPreferredWidth(60);
+        t.setAutoCreateRowSorter(true);
+    }
+
+    private JPanel getScoreboard(int id, String name) {
+        //Get scoreboard data from Gordon?
+        JPanel temp = new JPanel();
+        scoreboard = new JPanel();
+        temp.setLayout(new BoxLayout(temp, BoxLayout.Y_AXIS));
+        scoreboard.setLayout(new BoxLayout(scoreboard, BoxLayout.Y_AXIS));
+        temp.add(Box.createRigidArea(new Dimension(20,20)));
+        temp.add(scoreboard);
+        temp.add(Box.createVerticalGlue());
+        return temp;
+    }
+
+    public void updateScoreboard(int gid, String[] data) {
+        for(int i=2; i<data.length; i+=4) {
+            scoreboard.add(new JLabel(data[i+1]+" Score: "+data[i+2]));
+        }
+        scoreboard.revalidate();
+    }
+
 }
