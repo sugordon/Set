@@ -44,7 +44,7 @@ public class GUILobby extends JPanel{
             {"The Set World Championship", "1/5"}
     };
 
-    DefaultTableModel gameModel = new DefaultTableModel(gameData, gameColumnLabels);
+DefaultTableModel gameModel = new DefaultTableModel(gameData, gameColumnLabels);
 
     public void createLobby(String uid){
         lobby.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
