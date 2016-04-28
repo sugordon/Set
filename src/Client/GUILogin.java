@@ -1,5 +1,7 @@
 package Client;
 
+import network.Database;
+
 import javax.swing.*;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.awt.*;
@@ -111,7 +113,7 @@ public class GUILogin extends JPanel{
             public void actionPerformed(ActionEvent e) {
                 String username = getUN();
                 String password = getPass();
-                ClientInit.inStream.println("LOGIN," + username + "," + password);
+                ClientInit.inStream.println("LOGIN," + username + "," + Database.hash(password));
                 processResponse(e);
 
             }
@@ -121,7 +123,7 @@ public class GUILogin extends JPanel{
             public void actionPerformed(ActionEvent e) {
                 String username = getUN();
                 String password = getPass();
-                ClientInit.inStream.println("REGISTER," + username + "," + password);
+                ClientInit.inStream.println("REGISTER," + username + "," + Database.hash(password));
                 processResponse(e);
             }
         });
