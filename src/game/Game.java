@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package game;
 
@@ -23,25 +23,26 @@ import javax.swing.Timer;
 public class Game {
 	private ArrayList<Card> deck = new ArrayList<Card>(81);
 	private Board board = new Board();
-    private ArrayList<Player> players = new ArrayList<>();
-    private int lock = -1;
-    private HashSet<CardSet> allSets = new HashSet<>();
+	private ArrayList<Player> players = new ArrayList<Player>();
+	private int lock = -1;
+	private HashSet<CardSet> allSets = new HashSet<CardSet>();
 	private Timer lockTimer;
 
 	private final String gameName;
-    private final String owner;
-    private final int maxPlayers;
+	private final String owner;
+	private final int maxPlayers;
 
-    private final String pwd;
+	private final String pwd;
 
 	public Game(String name, String owner, int numPlayers, String pwd) {
-        this.gameName = name;
-        this.owner = owner;
-        this.maxPlayers = numPlayers;
-        this.pwd = pwd;
-        players.add(new Player(owner));
+		this.gameName = name;
+		this.owner = owner;
+		this.maxPlayers = numPlayers;
+		this.pwd = pwd;
+		players.add(new Player(owner));
 
-        this.createDeck(deck);
+		deck = Game.createDeck(deck);
+		Collections.shuffle(deck);
 		deal(12);
 		while (allSets.size() == 0) {
 			deal(3);
@@ -54,17 +55,17 @@ public class Game {
 		}
 
 		lockTimer = new Timer(3000, new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-					players.get(lock).increment(-1);
-					lock = -1;
-					System.out.println("Lock Reset");
-				}
-			});
+				players.get(lock).increment(-1);
+				lock = -1;
+				System.out.println("Lock Reset");
+			}
+		});
 		lockTimer.setRepeats(false);
 	}
-	
+
 	private boolean deal(int cards){
 		for (; cards != 0; cards--) {
 			if (deck.size() == 0 || (board.size() > 12 && allSets.size() == 0))
@@ -85,7 +86,7 @@ public class Game {
 		}
 		return true;
 	}
-	
+
 	public boolean lock(int playerNum) {
 		if (lock != -1) {
 			return false;
@@ -98,9 +99,9 @@ public class Game {
 	}
 
 	public boolean replace(String sOne, String sTwo, String sThree, int playerNum) {
-        Card one = new Card(sOne);
-        Card two = new Card(sTwo);
-        Card three = new Card(sThree);
+		int[] one = {sOne.charAt(0), sOne.charAt(1)};
+		int[] two = {sTwo.charAt(0), sTwo.charAt(1)};
+		int[] three = {sThree.charAt(0), sThree.charAt(1)};
 		if (playerNum != lock)
 			return false;
 		if (remove(one, two, three)) {
@@ -116,30 +117,33 @@ public class Game {
 		players.get(playerNum).increment(-1);
 		return false;
 	}
-	
-	private boolean remove(Card card1, Card card2, Card card3) {
+
+	private boolean remove(int[] one, int[] two, int[] three) {
+		Card card1 = board.get(one[0], one[1]);
+		Card card2 = board.get(two[0], two[1]);
+		Card card3 = board.get(three[0], three[1]);
 		if (!CardSet.isSet(card1, card2, card3)) {
 			return false;
 		}
-		remove(card1);
-		remove(card2);
-		remove(card3);
+		remove(one);
+		remove(two);
+		remove(three);
 		return true;
 	}
-	
-	private void remove(Card loc) {
-		board.remove(loc);
+
+	private void remove(int[] loc) {
+		Card removeCard = board.get(loc[0], loc[1]);
+		board.remove(removeCard);
 		for (Iterator<CardSet> i = allSets.iterator(); i.hasNext();) {
-		    CardSet element = i.next();
-		    if (element.contains(loc)) {
-		    	System.out.println(loc + " removing " + element);
-		    	i.remove();
-		    }
+			CardSet element = i.next();
+			if (element.contains(removeCard)) {
+				System.out.println(removeCard + " removing " + element);
+				i.remove();
+			}
 		}
 	}
-	
-	public void createDeck(ArrayList<Card> deck) {
-		deck.clear();
+
+	public static ArrayList<Card> createDeck(ArrayList<Card> deck) {
 		int[] vals = {0, 0, 0, 0};
 		//Initialize the Deck
 		for (int i = 0; i < 81; i++) {
@@ -154,22 +158,20 @@ public class Game {
 				}
 			}
 		}
-		//Collections.shuffle(deck);
-		//Always shuffle the same
-		Collections.shuffle(deck);
+		return deck;
 	}
 
-    public ArrayList<Card> getDeck() {
-        return deck;
-    }
+	public ArrayList<Card> getDeck() {
+		return deck;
+	}
 
-    public Board getBoard() {
-        return board;
-    }
+	public Board getBoard() {
+		return board;
+	}
 
-    public ArrayList<Player> getPlayers() {
-        return players;
-    }
+	public ArrayList<Player> getPlayers() {
+		return players;
+	}
 
 	public void addPlayer(String p) {
 		this.players.add(new Player(p));
@@ -179,38 +181,33 @@ public class Game {
 		this.players.remove(new Player(p));
 	}
 
-    public int getLock() {
-        return lock;
-    }
+	public int getLock() {
+		return lock;
+	}
 
-    public String getGameName() {
-        return gameName;
-    }
+	public String getGameName() {
+		return gameName;
+	}
 
-    public String getOwner() {
-        return owner;
-    }
+	public String getOwner() {
+		return owner;
+	}
 
-    public int getMaxPlayers() {
-        return maxPlayers;
-    }
+	public int getMaxPlayers() {
+		return maxPlayers;
+	}
 
-    public String getPwd() {
-        return pwd;
-    }
-
-	@Override
-	public String toString() {
-		return this.getGameName() + "," + this.getOwner() + "," + this.getPlayers().size() + "," + this.getMaxPlayers() + ":";
+	public String getPwd() {
+		return pwd;
 	}
 
 	public static void main(String[] args) {
 		Game game = new Game("game", "Gordon", 5, Database.hash("1234"));
 		Scanner s = new Scanner(System.in);
 		System.out.println("Removing");
-        String one =    "01";
-        String two =    "00";
-        String three =  "20";
+		String one =    "01";
+		String two =    "00";
+		String three =  "20";
 		System.out.println(game.board.get(0, 1));
 		game.lock(0);
 		game.replace(one, two, three, 0);

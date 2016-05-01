@@ -1,6 +1,7 @@
 package Client;
 
 import game.Card;
+import game.Game;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -13,6 +14,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 
@@ -22,7 +24,7 @@ import java.util.HashMap;
 public class GUIGame extends JPanel{
 
     // Toggle button so it grays out when pressed
-    public game.Card [] cards = new game.Card[81];     //Array of cards, in a grid
+    public ArrayList<game.Card> cards = new ArrayList<>();     //Array of cards, in a grid
 
     public JFrame gameboard = new JFrame("SET");
 
@@ -58,6 +60,7 @@ public class GUIGame extends JPanel{
     public GUIGame(int rows, String uid) {
         this.rows = rows;
         this.myUN = uid;
+        cards = Game.createDeck(new ArrayList<>());
         createAndShowBoard();
     }
 
@@ -117,6 +120,7 @@ public class GUIGame extends JPanel{
         gameboard.setResizable(false);
         gameboard.pack();
 
+        users = new JPanel();
         createCardSpace();
 
         GridBagConstraints c;
@@ -163,14 +167,15 @@ public class GUIGame extends JPanel{
         //Get which cards should be displayed from Server
 
         for(int i = 0; i < 12; i++) {
-            cards[i].setVisible(true);
-            cards[i].setPreferredSize(new Dimension(20,20));
-            cards[i].addActionListener(new ActionListener() {
+            Card tmp = cards.get(i);
+            tmp.setVisible(true);
+            tmp.setPreferredSize(new Dimension(20,20));
+            tmp.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     System.out.println("YOU PRESSED THE BUTTON.\n");
                 }
             });
-            cardspace.add(cards[i]);
+            cardspace.add(tmp);
         }
 
 
@@ -178,91 +183,28 @@ public class GUIGame extends JPanel{
         cardspace.setVisible(true);
     }
 
-    public void generateCards(game.Card [] cards) {
+
+    public void generateCards(ArrayList<game.Card> cards) {
         try {
-            //for(int i = 0; i < 81; i++) {
-               // File f = new File("C:\\Users\\Bridget\\Documents\\Spring 2016\\Software\\Set\\Images\\0001.gif");
-                //Image img = ImageIO.read(f);
-                //Image img = ImageIO.read("../src/Client.Images/" + cards[i].toString() + ".gif");
-                cards[0].setIcon(new ImageIcon(this.getClass().getResource("bin/Images/0000.gif")));
-                //BufferedImage buttonicon = ImageIO.read(new("buttonIconPath"));
-                //cards[0].setIcon(new ImageIcon(img));
-                cards[0].setBorder(BorderFactory.createEmptyBorder());
-                cards[0].setContentAreaFilled(false);
-
-                File g = new File("C:/Users/Bridget/Documents/Spring 2016/Set/Images/0120.gif");
-                Image img = ImageIO.read(g);
-                cards[1].setIcon(new ImageIcon(img));
-                cards[1].setBorder(BorderFactory.createEmptyBorder());
-                cards[1].setContentAreaFilled(false);
-
-                File h = new File("C:/Users/Bridget/Documents/Spring 2016/Set/Images/0001.gif");
-                img = ImageIO.read(h);
-                cards[2].setIcon(new ImageIcon(img));
-                cards[2].setBorder(BorderFactory.createEmptyBorder());
-                cards[2].setContentAreaFilled(false);
-
-                File i = new File("C:/Users/Bridget/Documents/Spring 2016/Set/Images/0202.gif");
-                img = ImageIO.read(i);
-                cards[3].setIcon(new ImageIcon(img));
-                cards[3].setBorder(BorderFactory.createEmptyBorder());
-                cards[3].setContentAreaFilled(false);
-
-                File j = new File("C:/Users/Bridget/Documents/Spring 2016/Set/Images/2121.gif");
-                img = ImageIO.read(j);
-                cards[4].setIcon(new ImageIcon(img));
-                cards[4].setBorder(BorderFactory.createEmptyBorder());
-                cards[4].setContentAreaFilled(false);
-
-                File k = new File("C:/Users/Bridget/Documents/Spring 2016/Set/Images/1220.gif");
-                img = ImageIO.read(k);
-                cards[5].setIcon(new ImageIcon(img));
-                cards[5].setBorder(BorderFactory.createEmptyBorder());
-                cards[5].setContentAreaFilled(false);
-
-                File l = new File("C:/Users/Bridget/Documents/Spring 2016/Set/Images/2222.gif");
-                img = ImageIO.read(l);
-                cards[6].setIcon(new ImageIcon(img));
-                cards[6].setBorder(BorderFactory.createEmptyBorder());
-                cards[6].setContentAreaFilled(false);
-
-                File m = new File("C:/Users/Bridget/Documents/Spring 2016/Set/Images/0201.gif");
-                img = ImageIO.read(m);
-                cards[7].setIcon(new ImageIcon(img));
-                cards[7].setBorder(BorderFactory.createEmptyBorder());
-                cards[7].setContentAreaFilled(false);
-
-                File n = new File("C:/Users/Bridget/Documents/Spring 2016/Set/Images/2122.gif");
-                img = ImageIO.read(n);
-                cards[8].setIcon(new ImageIcon(img));
-                cards[8].setBorder(BorderFactory.createEmptyBorder());
-                cards[8].setContentAreaFilled(false);
-
-                File o = new File("C:/Users/Bridget/Documents/Spring 2016/Set/Images//1110.gif");
-                img = ImageIO.read(o);
-                cards[9].setIcon(new ImageIcon(img));
-                cards[9].setBorder(BorderFactory.createEmptyBorder());
-                cards[9].setContentAreaFilled(false);
-
-                File p = new File("C:/Users/Bridget/Documents/Spring 2016/Set/Images/1000.gif");
-                img = ImageIO.read(p);
-                cards[10].setIcon(new ImageIcon(img));
-                cards[10].setBorder(BorderFactory.createEmptyBorder());
-                cards[10].setContentAreaFilled(false);
-
-                File q = new File("C:/Users/Bridget/Documents/Spring 2016/Set/Images/2211.gif");
-                img = ImageIO.read(q);
-                cards[11].setIcon(new ImageIcon(img));
-                cards[11].setBorder(BorderFactory.createEmptyBorder());
-                cards[11].setContentAreaFilled(false);
-           // }
-        }catch (IOException ex) {
-                ex.printStackTrace();
+            for (int i = 0; i < 81; i++) {
+                Card tmp = cards.get(i);
+                String path = "./bin/" + tmp.toString() + ".gif";
+                File f = new File(path);
+                System.out.println(f.exists());
+                Image img = ImageIO.read(f);
+//                System.out.println(path);
+//                ImageIcon img = new ImageIcon(getClass().getResource(path));
+//                ImageIcon img = new ImageIcon(getClass().getResource("images_cards/0000.gif"));
+//                tmp.setIcon(img);
+                tmp.setIcon(new ImageIcon(img));
+                tmp.setBorder(BorderFactory.createEmptyBorder());
+                tmp.setContentAreaFilled(false);
             }
-
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         //return cards;
     }
-
     //Disables the SET button for a specified amount of time after it's been pressed
     public void disableSET(final int time) {
         if(time != 0) {
