@@ -16,43 +16,46 @@ import java.util.Arrays;
 
 public class GUILobby extends JPanel{
     public JFrame lobby = new JFrame("Lobby");
-
-    private JPanel games = new JPanel();
-    private JPanel theOneTruePanel = new JPanel(new GridLayout(1,1,0,0));
-
-    //private JTable userTable;
-    private JTable gameTable;
-
-    //private JButton refreshScoreboard = new JButton("Refresh");
-    private JButton refreshGameButton = new JButton("Refresh");
     public JButton createGameButton = new JButton("Create Game");
     public JButton createGameButton2 = new JButton("Submit New Game");
+    public JButton cancelGameCreate = new JButton("Cancel");
     public JButton logoutButton = new JButton("Logout");
     public JButton joinGameButton = new JButton("Join Game");
-
-
-    private JTextField nameField = new JTextField();    //game name
-    private JTextField passField = new JTextField();    //game password
-    private String myID;
-
-
     public int selectedRow;
-
     String[] gameColumnLabels = {"Game Name", "Owner", "Players", "Max Players"};
-
     ArrayList<Object[]> gameData = new ArrayList<>();
-
-//    Object[][] gameData = {                                                     //swap for Game.getGameName, and Game.getPlayers? and Game.getMaxPlayers?
-//            {"Meow Mix Cafe", "2/2"},
-//            {"Alpaca Picnic", "2/5"},
-//            {"The Set World Championship", "1/5"}
-//    };
-
-//    DefaultTableModel gameModel = new DefaultTableModel(gameData, gameColumnLabels);
     DefaultTableModel gameModel = new DefaultTableModel();
+    private JPanel games = new JPanel();
+    private JPanel theOneTruePanel = new JPanel(new GridLayout(1,2));
+    private JTable gameTable;
+    private JButton refreshGameButton = new JButton("Refresh");
+    private JTextField nameField = new JTextField();    //game name
+    private JPasswordField passField = new JPasswordField();    //game password
+    private String myID;
+    private FocusListener passFocus = new FocusAdapter() {
+        public void focusGained(java.awt.event.FocusEvent evt) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    passField.selectAll();
+                }
+            });
+        }
+    };
+    private FocusListener nameFocus = new FocusAdapter() {
+        public void focusGained(java.awt.event.FocusEvent evt) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    nameField.selectAll();
+                }
+            });
+        }
+    };
 
     public void createLobby(String uid){
         lobby.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        GridBagConstraints c = new GridBagConstraints();
 
         lobby.getContentPane().setBackground(new Color(168, 168, 168));
         lobby.setPreferredSize(new Dimension(1000, 700));
@@ -61,13 +64,13 @@ public class GUILobby extends JPanel{
         this.myID = uid;
 
         games.setLayout(new BoxLayout(games, BoxLayout.Y_AXIS));
+        games.setSize(new Dimension(800,800));
 
         //Game Section
 
         Object[][] gd = {
-                {"Meow Mix Cafe", "Venkat", "2", "2"},
-                {"Alpaca Picnic", "Vanket", "2", "5"},
-                {"The Set World Championship", "Venkat", "1", "5"}
+
+                {"", "", "", ""}
         };
         DefaultTableModel gameModel = new DefaultTableModel(gd, gameColumnLabels);
         gameTable = new JTable(gameModel) {
@@ -83,54 +86,34 @@ public class GUILobby extends JPanel{
         games.add(gamesLabel);
         games.add(scrollPane);
 
-        add(refreshGameButton);
-        add(createGameButton);
         setAlignmentX(Component.CENTER_ALIGNMENT);
         setMaximumSize(new Dimension(200, 10));
 
-        add(games, BorderLayout.SOUTH);
+
         games.setVisible(true);
         addListeners();
-        passField.addFocusListener(passFocus);
-        nameField.addFocusListener(nameFocus);
+
         passField.setPreferredSize(new Dimension(160, 25));
         nameField.setPreferredSize(new Dimension(160, 25));
 
         //The one actual panel where everything appears
         theOneTruePanel.setBorder(BorderFactory.createLineBorder(new Color(51, 255, 255)));
+        theOneTruePanel.setPreferredSize(new Dimension(1000,800));
+        this.update_game_list(gameData);
+
         theOneTruePanel.add(getGamePanel((String) gameTable.getModel().getValueAt(selectedRow, 1)));
+        theOneTruePanel.add(games);
+
+
+
+        //theOneTruePanel.add(refreshGameButton);
+        //theOneTruePanel.add(createGameButton);
+
         add(theOneTruePanel, BorderLayout.CENTER);
 
-
-        refreshGameButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent event) {
-                update_game_list(gameData);
-            }
-        });
-        logoutButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent event) {
-                disconnect_from_server();
-            }
-        });
-        createGameButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent event) {
-                theOneTruePanel.removeAll();
-                theOneTruePanel.add(getGameCreationPanel());
-                theOneTruePanel.revalidate();
-            }
-        });
-        createGameButton2.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String gameName = nameField.getText();
-                String password = getPass();
-                create_game(myID, gameName, password, 5);
-            }
-        });
         lobby.add(this);
         setVisible(true);
         theOneTruePanel.setVisible(true);
-        this.update_game_list(gameData);
     }
 
     private void addListeners(){
@@ -149,38 +132,58 @@ public class GUILobby extends JPanel{
                 ListSelectionModel lsm = (ListSelectionModel) e.getSource();
                 if(!lsm.isSelectionEmpty()) {
                     selectedRow = gameTable.convertRowIndexToModel(lsm.getMinSelectionIndex());
-                    theOneTruePanel.removeAll();
-                    theOneTruePanel.add(getGamePanel((String) gameTable.getModel().getValueAt(selectedRow, 1)));
-                    theOneTruePanel.revalidate();
+                    resetTheOneTruePanel();
                 }
             }
         };
 
         gameTable.getSelectionModel().addListSelectionListener(lsl);
 
+        refreshGameButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                update_game_list(gameData);
+            }
+        });
+        logoutButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                disconnect_from_server();
+            }
+        });
+        createGameButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                theOneTruePanel.removeAll();
+                theOneTruePanel.add(getGameCreationPanel());
+                theOneTruePanel.revalidate();
+                theOneTruePanel.repaint();
+            }
+        });
+        createGameButton2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String gameName = nameField.getText();
+                String password = getPass();
+                create_game(myID, gameName, password, 5);
+            }
+        });
+
+        cancelGameCreate.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                resetTheOneTruePanel();;
+            }
+        });
+
+        joinGameButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //TODO : GORDON
+            }
+        });
+
+        passField.addFocusListener(passFocus);
+        nameField.addFocusListener(nameFocus);
+
     }
-
-    private FocusListener passFocus = new FocusAdapter() {
-        public void focusGained(java.awt.event.FocusEvent evt) {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    passField.selectAll();
-                }
-            });
-        }
-    };
-
-    private FocusListener nameFocus = new FocusAdapter() {
-        public void focusGained(java.awt.event.FocusEvent evt) {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    nameField.selectAll();
-                }
-            });
-        }
-    };
 
     private void update_game_list(ArrayList<Object[]> gameData){
         System.out.println("HIHI");
@@ -195,10 +198,9 @@ public class GUILobby extends JPanel{
         }
         System.out.println(s);
 
-        //GORDON FILL IN
+        gameData.clear();
         String[] sents = s.split(":");
         for (String sent : Arrays.copyOfRange(sents, 1, sents.length-1)) {
-            String[] toks = sent.split(",");
             gameData.add(sent.split(","));
         }
         Object tmp[][] = new Object[gameData.size()][4];
@@ -230,24 +232,42 @@ public class GUILobby extends JPanel{
         } catch (IOException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Error creating game");
+            resetTheOneTruePanel();
         }
         System.out.println(s);
+        resetTheOneTruePanel();
     }
 
     public void resetTheOneTruePanel() {
+        detachListeners();
         theOneTruePanel.removeAll();
         theOneTruePanel.add(getGamePanel((String) gameTable.getModel().getValueAt(selectedRow, 1)));
+        theOneTruePanel.add(games);
+        //theOneTruePanel.add(refreshGameButton);
+        //theOneTruePanel.add(createGameButton);
+        theOneTruePanel.revalidate();
+        theOneTruePanel.repaint();
+        addListeners();
+
     }
 
     //Game panel
     private JPanel getGamePanel(String name) {
         JPanel temp = new JPanel();
+        temp.setMaximumSize(new Dimension(200,800));
         temp.setLayout(new BoxLayout(temp, BoxLayout.Y_AXIS));
         temp.add(Box.createRigidArea(new Dimension(20,20)));
         temp.add(new JLabel("<html><h1>"+name+"</h1></html>"));
         temp.add(new JLabel("<html><p>Players:</p></html>"));
         temp.add(Box.createVerticalGlue());
-        temp.add(joinGameButton);
+//        temp.add(joinGameButton);
+//        temp.add(refreshGameButton);
+//        temp.add(createGameButton);
+        JPanel buttons = new JPanel(new FlowLayout());
+        buttons.add(joinGameButton);
+        buttons.add(refreshGameButton);
+        buttons.add(createGameButton);
+        temp.add(buttons);
         return temp;
     }
 
@@ -264,7 +284,10 @@ public class GUILobby extends JPanel{
         names.add(passField);
         temp.add(names);
         temp.add(Box.createVerticalGlue());
-        temp.add(createGameButton2);
+        JPanel buttons = new JPanel(new FlowLayout());
+        buttons.add(createGameButton2);
+        buttons.add(cancelGameCreate);
+        temp.add(buttons);
         return temp;
     }
 
