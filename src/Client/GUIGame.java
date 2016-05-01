@@ -375,7 +375,7 @@ public class GUIGame extends JPanel{
     }
 
     public static void main(String [] args){
-        GUIGame game = new GUIGame();
+        GUIGame game = new GUIGame(3,"LOL");
         game.createAndShowBoard();
     }
 
