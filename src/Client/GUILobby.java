@@ -101,7 +101,16 @@ public class GUILobby extends JPanel{
         theOneTruePanel.setPreferredSize(new Dimension(1000,800));
         this.update_game_list(gameData);
 
-        theOneTruePanel.add(getGamePanel((String) gameTable.getModel().getValueAt(selectedRow, 1)));
+
+        String display;
+        try {
+            display = (String) gameTable.getModel().getValueAt(selectedRow, 1);
+        }
+        catch(ArrayIndexOutOfBoundsException e){
+            display = "No games";
+        }
+
+        theOneTruePanel.add(getGamePanel(display));
         theOneTruePanel.add(games);
 
 
@@ -241,10 +250,16 @@ public class GUILobby extends JPanel{
     public void resetTheOneTruePanel() {
         detachListeners();
         theOneTruePanel.removeAll();
-        theOneTruePanel.add(getGamePanel((String) gameTable.getModel().getValueAt(selectedRow, 1)));
+
+        String display;
+        try {
+            display = (String) gameTable.getModel().getValueAt(selectedRow, 1);
+        }
+        catch(ArrayIndexOutOfBoundsException e){
+            display = "No games";
+        }
+        theOneTruePanel.add(getGamePanel(display));
         theOneTruePanel.add(games);
-        //theOneTruePanel.add(refreshGameButton);
-        //theOneTruePanel.add(createGameButton);
         theOneTruePanel.revalidate();
         theOneTruePanel.repaint();
         addListeners();
@@ -260,9 +275,6 @@ public class GUILobby extends JPanel{
         temp.add(new JLabel("<html><h1>"+name+"</h1></html>"));
         temp.add(new JLabel("<html><p>Players:</p></html>"));
         temp.add(Box.createVerticalGlue());
-//        temp.add(joinGameButton);
-//        temp.add(refreshGameButton);
-//        temp.add(createGameButton);
         JPanel buttons = new JPanel(new FlowLayout());
         buttons.add(joinGameButton);
         buttons.add(refreshGameButton);
