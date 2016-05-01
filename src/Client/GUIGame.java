@@ -60,6 +60,9 @@ public class GUIGame extends JPanel{
         this.rows = rows;
         this.myUN = uid;
         cards = Game.createDeck(new ArrayList<>());
+
+        createAndShowBoard();
+
     }
 
     /*
@@ -379,6 +382,7 @@ public class GUIGame extends JPanel{
             this.row = r;
         }
     }
+
 
     public static void main(String [] args){
         GUIGame game = new GUIGame(4,"LOL");

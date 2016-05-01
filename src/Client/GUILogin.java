@@ -114,7 +114,7 @@ public class GUILogin extends JPanel{
                 String username = getUN();
                 String password = getPass();
                 ClientInit.inStream.println("LOGIN," + username + "," + Database.hash(password));
-                processResponse(e);
+                //processResponse(e);
 
             }
         });
@@ -124,7 +124,7 @@ public class GUILogin extends JPanel{
                 String username = getUN();
                 String password = getPass();
                 ClientInit.inStream.println("REGISTER," + username + "," + Database.hash(password));
-                processResponse(e);
+                //processResponse(e);
             }
         });
     }
@@ -138,44 +138,40 @@ public class GUILogin extends JPanel{
         passwordText.removeFocusListener(passFocus);
     }
 
-    private String processResponse(ActionEvent e){
+    public String processResponse(String msg){
         String response = null;
         try {
-            while((response = ClientInit.outStream.readLine()) != null){
-                String[] tokens = response.split("\\s*,\\s*");
-                System.out.println(response );
-                if(tokens[0] == "BAD_VALUE"){
-                    //TODO
-                }
-                else if(tokens[0].equals("ACK_REGISTER")) {
-                    if (tokens[1].equals("SUCCESS")) {
-                        response = "Successfully Regi)stered.  Please log in";
-                        JOptionPane.showMessageDialog((Component) e.getSource(), response);
-                    } else if (tokens[1].equals("FAILURE")){
-                        response = "Unable to register.  Please try again";
-                        JOptionPane.showMessageDialog((Component) e.getSource(), response);
-                    }
-                    else if (tokens[1].equals("EXISTS")) {
-                        response = "Unable to register. Username already exists";
-                        JOptionPane.showMessageDialog((Component) e.getSource(), response);
-                    }
-                }
-                else if(tokens[0].equals("ACK_LOGIN")){
-                    if(tokens[1].equals("FAILURE")) {
-                        response = "Unable to login.  Please try again.";
-                        JOptionPane.showMessageDialog((Component) e.getSource(), response);
-                    }
-                    if(tokens[1].equals("SUCCESS")){
-                        if (tokens[2].equals("LOBBY")){
-                            ClientInit.STATE = ClientInit.LOBBY;
-                            ClientInit.switchStates(ClientInit.LOGIN,ClientInit.LOBBY);
-                        }
-                    }
-                }
-                break;
-
+            String[] tokens = msg.split("\\s*,\\s*");
+            System.out.println(response );
+            if(tokens[0] == "BAD_VALUE"){
+                //TODO
             }
-        } catch (IOException ex) {
+            else if(tokens[0].equals("ACK_REGISTER")) {
+                if (tokens[1].equals("SUCCESS")) {
+                    response = "Successfully Regi)stered.  Please log in";
+                    JOptionPane.showMessageDialog(null, response);
+                } else if (tokens[1].equals("FAILURE")){
+                    response = "Unable to register.  Please try again";
+                    JOptionPane.showMessageDialog(null, response);
+                }
+                else if (tokens[1].equals("EXISTS")) {
+                    response = "Unable to register. Username already exists";
+                    JOptionPane.showMessageDialog(null, response);
+                }
+            }
+            else if(tokens[0].equals("ACK_LOGIN")){
+                if(tokens[1].equals("FAILURE")) {
+                    response = "Unable to login.  Please try again.";
+                    JOptionPane.showMessageDialog(null, response);
+                }
+                if(tokens[1].equals("SUCCESS")){
+                    if (tokens[2].equals("LOBBY")){
+                        ClientInit.STATE = ClientInit.LOBBY;
+                        ClientInit.switchStates(ClientInit.LOGIN,ClientInit.LOBBY);
+                    }
+                }
+            }
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 

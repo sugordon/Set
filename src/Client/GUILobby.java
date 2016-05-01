@@ -101,7 +101,20 @@ public class GUILobby extends JPanel{
         theOneTruePanel.setPreferredSize(new Dimension(1000,800));
         this.update_game_list(gameData);
 
-        theOneTruePanel.add(getGamePanel((String) gameTable.getModel().getValueAt(selectedRow, 1)));
+
+        String gamename,owner,players;
+        try {
+            gamename = (String) gameTable.getModel().getValueAt(selectedRow, 0);
+            players = (String) gameTable.getModel().getValueAt(selectedRow,2);
+            owner = (String) gameTable.getModel().getValueAt(selectedRow,1);
+        }
+        catch(ArrayIndexOutOfBoundsException e){
+            gamename = "No games";
+            players = "";
+            owner = "";
+        }
+
+        theOneTruePanel.add(getGamePanel(gamename,owner,players));
         theOneTruePanel.add(games);
 
 
@@ -190,6 +203,7 @@ public class GUILobby extends JPanel{
         ClientInit.inStream.println("GAMES");
         System.out.println("SENT");
         String s = null;
+        /*
         try {
             while ((s = ClientInit.outStream.readLine()) == null);
         } catch (IOException e) {
@@ -208,6 +222,7 @@ public class GUILobby extends JPanel{
         gameModel = new DefaultTableModel(tmp, gameColumnLabels);
         gameTable.setModel(gameModel);
         formatTable(gameTable);
+        */
     }
 
     private void disconnect_from_server(){
@@ -226,25 +241,52 @@ public class GUILobby extends JPanel{
             return;
         }
         ClientInit.inStream.println("CREATE,"+game_name+","+max_users+","+game_password);
-        String s = null;
-        try {
-            while ((s = ClientInit.outStream.readLine()) == null);
-        } catch (IOException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Error creating game");
-            resetTheOneTruePanel();
+    }
+
+    public void processResponse(String msg){
+        String [] tokens = msg.split(",");
+        System.out.println(msg);
+        System.out.println("Lobby processing the response");
+        if(tokens[0].equals("ACK_CREATE")){
+            if(tokens[1].equals("SUCCESS"))
+                System.out.println(msg);
+            else
+                JOptionPane.showMessageDialog(null,"Error creating game!");
         }
-        System.out.println(s);
-        resetTheOneTruePanel();
+        else if (tokens[0].equals("ACK_GAMES")){
+
+            gameData.clear();
+            String[] sents = msg.split(":");
+            for (String sent : Arrays.copyOfRange(sents, 1, sents.length-1)) {
+                gameData.add(sent.split(","));
+            }
+            Object tmp[][] = new Object[gameData.size()][4];
+            tmp = gameData.toArray(tmp);
+            gameModel = new DefaultTableModel(tmp, gameColumnLabels);
+            gameTable.setModel(gameModel);
+            formatTable(gameTable);
+        }
+
     }
 
     public void resetTheOneTruePanel() {
         detachListeners();
         theOneTruePanel.removeAll();
-        theOneTruePanel.add(getGamePanel((String) gameTable.getModel().getValueAt(selectedRow, 1)));
+
+        String gamename,owner,players;
+        try {
+            gamename= (String) gameTable.getModel().getValueAt(selectedRow, 0);
+            owner= (String) gameTable.getModel().getValueAt(selectedRow, 1);
+            players= (String) gameTable.getModel().getValueAt(selectedRow, 2);
+
+        }
+        catch(ArrayIndexOutOfBoundsException e){
+            gamename = "No games";
+            owner = "";
+            players = "";
+        }
+        theOneTruePanel.add(getGamePanel(gamename,owner,players));
         theOneTruePanel.add(games);
-        //theOneTruePanel.add(refreshGameButton);
-        //theOneTruePanel.add(createGameButton);
         theOneTruePanel.revalidate();
         theOneTruePanel.repaint();
         addListeners();
@@ -252,17 +294,15 @@ public class GUILobby extends JPanel{
     }
 
     //Game panel
-    private JPanel getGamePanel(String name) {
+    private JPanel getGamePanel(String name,String owner,String players) {
         JPanel temp = new JPanel();
         temp.setMaximumSize(new Dimension(200,800));
         temp.setLayout(new BoxLayout(temp, BoxLayout.Y_AXIS));
         temp.add(Box.createRigidArea(new Dimension(20,20)));
-        temp.add(new JLabel("<html><h1>"+name+"</h1></html>"));
-        temp.add(new JLabel("<html><p>Players:</p></html>"));
+        temp.add(new JLabel("<html><h1>Game: "+name+"</h1></html>"));
+        temp.add(new JLabel("<html><p>Owner: "+owner+"</p></html>"));
+        temp.add(new JLabel("<html><p>Players: "+players+"</p></html>"));
         temp.add(Box.createVerticalGlue());
-//        temp.add(joinGameButton);
-//        temp.add(refreshGameButton);
-//        temp.add(createGameButton);
         JPanel buttons = new JPanel(new FlowLayout());
         buttons.add(joinGameButton);
         buttons.add(refreshGameButton);
