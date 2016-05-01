@@ -199,6 +199,7 @@ public class GUILobby extends JPanel{
         ClientInit.inStream.println("GAMES");
         System.out.println("SENT");
         String s = null;
+        /*
         try {
             while ((s = ClientInit.outStream.readLine()) == null);
         } catch (IOException e) {
@@ -217,6 +218,7 @@ public class GUILobby extends JPanel{
         gameModel = new DefaultTableModel(tmp, gameColumnLabels);
         gameTable.setModel(gameModel);
         formatTable(gameTable);
+        */
     }
 
     private void disconnect_from_server(){
@@ -235,16 +237,32 @@ public class GUILobby extends JPanel{
             return;
         }
         ClientInit.inStream.println("CREATE,"+game_name+","+max_users+","+game_password);
-        String s = null;
-        try {
-            while ((s = ClientInit.outStream.readLine()) == null);
-        } catch (IOException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Error creating game");
-            resetTheOneTruePanel();
+    }
+
+    public void processResponse(String msg){
+        String [] tokens = msg.split(",");
+        System.out.println(msg);
+        System.out.println("Lobby processing the response");
+        if(tokens[0].equals("ACK_CREATE")){
+            if(tokens[1].equals("SUCCESS"))
+                System.out.println(msg);
+            else
+                JOptionPane.showMessageDialog(null,"Error creating game!");
         }
-        System.out.println(s);
-        resetTheOneTruePanel();
+        else if (tokens[0].equals("ACK_GAMES")){
+
+            gameData.clear();
+            String[] sents = msg.split(":");
+            for (String sent : Arrays.copyOfRange(sents, 1, sents.length-1)) {
+                gameData.add(sent.split(","));
+            }
+            Object tmp[][] = new Object[gameData.size()][4];
+            tmp = gameData.toArray(tmp);
+            gameModel = new DefaultTableModel(tmp, gameColumnLabels);
+            gameTable.setModel(gameModel);
+            formatTable(gameTable);
+        }
+
     }
 
     public void resetTheOneTruePanel() {

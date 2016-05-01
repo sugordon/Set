@@ -62,6 +62,7 @@ public class GUIGame extends JPanel{
         this.myUN = uid;
         cards = Game.createDeck(new ArrayList<>());
         createAndShowBoard();
+
     }
 
     public MouseAdapter cardSelectionListener = new MouseAdapter() {
@@ -315,6 +316,7 @@ public class GUIGame extends JPanel{
             this.row = r;
         }
     }
+
 
     public static void main(String [] args){
         GUIGame game = new GUIGame(3,"LOL");

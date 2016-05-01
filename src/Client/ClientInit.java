@@ -132,8 +132,34 @@ public class ClientInit {
 
     }
 
+    static class ListenFromServer extends Thread {
+        String msg;
+        public void run() {
+            while(true) {
+                try {
+                    while ((msg = (String) ClientInit.outStream.readLine()) == null );
+                }
+                catch(IOException e) {
+                }
+
+                processInput(msg);
+            }
+        }
+
+        private void processInput(String msg){
+            if(STATE == LOGIN){
+                login.processResponse(msg);
+            }
+            else if (STATE == LOBBY)
+                lobby.processResponse(msg);
+            else if (STATE == ROOM);
+
+        }
+    }
+
     public static void main(String[] args) {
         initConn();
+        new ListenFromServer().start();
         startGUI();
     }
 
