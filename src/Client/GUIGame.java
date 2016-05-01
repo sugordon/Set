@@ -60,32 +60,7 @@ public class GUIGame extends JPanel{
         this.rows = rows;
         this.myUN = uid;
         cards = Game.createDeck(new ArrayList<>());
-
-        createAndShowBoard();
-
     }
-
-    /*
-    public MouseAdapter cardSelectionListener = new MouseAdapter() {
-        @Override
-        public void mouseReleased(MouseEvent e) {
-            Card c = (Card) e.getSource();
-            if(selectEnabled) {
-                if(selected.contains(c)) {
-                    c.setSelected(false);
-                    selected.remove(c);
-                } else if(selected.size() < 3) {
-                    c.setEnabled(false);
-                    selected.add(c);
-                }
-                String ids = "";
-                for(Card i : selected)
-                    ids += i.toString()+"`";
-                //updateCards();
-            }
-        }
-    };
-    */
 
     private Timer timer = new Timer(1000, null);
     private int t;
