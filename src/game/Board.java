@@ -39,17 +39,30 @@ public class Board implements Iterable<Card> {
 		return maxRow;
 	}
 
-	public void remove(int row, int col) {
+	public int[] find(Card c) {
+		int[] ans = new int[2];
+		for (ans[0] = 0; ans[0] < maxRow + 1; ans[0]++) {
+			for (ans[1] = 0; ans[1] < 3; ans[1]++) {
+				if (board[ans[0]][ans[1]] == c) {
+					return ans;
+				}
+			}
+		}
+		return null;
+	}
+
+	public void remove(Card c) {
 		if (cards == 0) {
 			System.err.println("Tried to remove empty cell");
 			return;
 		}
+		int[] loc = this.find(c);
 		cards -= 1;
-		board[row][col] = null;
-		if (row == maxRow - 1 &&
-				board[row][0] == null &&
-				board[row][1] == null &&
-				board[row][2] == null) {
+		board[loc[0]][loc[1]] = null;
+		if (loc[0] == maxRow - 1 &&
+				board[loc[0]][0] == null &&
+				board[loc[0]][1] == null &&
+				board[loc[0]][2] == null) {
 			maxRow -= 1;
 		}
 	}

@@ -22,7 +22,7 @@ public class ClientInit {
 
     private static String HOST = "sable06.ee.cooper.edu";
     private static int PORT = 7100;
-    private static Socket sck;
+    public static Socket sck;
 
     public static BufferedReader outStream;
     public static PrintWriter inStream;
@@ -95,7 +95,6 @@ public class ClientInit {
         login = new GUILogin();
         login.createAndShowLogin();
         lobby = new GUILobby();
-        lobby.createLobby("ALPACAS");
     }
 
     public static void switchStates(int current, int next){
@@ -105,6 +104,7 @@ public class ClientInit {
                 login.setVisible(true);
                 break;
             case LOBBY:
+                lobby.createLobby("ALPACAS");
                 lobby.lobby.setVisible(true);
                 break;
             case ROOM:

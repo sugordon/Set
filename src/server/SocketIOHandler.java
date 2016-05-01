@@ -65,6 +65,16 @@ public class SocketIOHandler{
                 else output = "BAD_VALUE,LOGIN";    //invalid data received from
                 break;
             case LOBBY:
+                if (s[0].equals("GAMES")) {
+                    output = "ACK_GAMES,SUCCESS:";
+                    for (Game g : ServerInit.gameRooms.values()) {
+                        output +=  g.toString();
+                    }
+                    if (ServerInit.gameRooms.size() == 0) {
+                        output += ":";
+                    }
+                    output += "ROOM";
+                }
                 //List of all games
                 if(s[0].equals("CREATE")) {
                     //Current user does not have a game, assumes all input is valid
@@ -91,19 +101,19 @@ public class SocketIOHandler{
                 break;
             case GAME:
                 Game g = _thread.getGame();
-                if (s[0] == "GAME_START") {
+                if (s[0].equals("GAME_START")) {
                     output = "ACK_START,"+g.getGameName()+","+g.getPlayers()+","+g.getBoard()+",GAME";
                 }
-                if (s[0] == "UPDATE") {
+                if (s[0].equals("UPDATE")) {
                     output = "ACK_UPDATE,UPDATE,GAME";
                 }
                 //s[1] contains the player number of the lock
-                if (s[0] == "LOCK") {
+                if (s[0].equals("LOCK")) {
                     g.lock(Integer.parseInt(s[1]));
                     output = "ACK_LOCK,"+g.getLock()+",GAME";
                 }
                 //s[1], s[2], s[3] contains the three cards, s[4] contains the player number
-                if (s[0] == "REPLACE") {
+                if (s[0].equals("REPLACE")) {
                     boolean success = g.replace(s[1], s[2], s[3], Integer.parseInt(s[4]));
                     output = "ACK_REPLACE,"+success+","+g.getBoard()+",GAME";
                 }
