@@ -35,7 +35,7 @@ public class GUIGame extends JPanel{
     public JButton setButton = new JButton("SET");
     private JButton refreshScoreboard = new JButton("Refresh");
 
-    private int myID;
+    public String myUN;
     public int cardcount = 0;
     public int rows;
     private boolean selectEnabled = false;
@@ -54,17 +54,24 @@ public class GUIGame extends JPanel{
 
     DefaultTableModel userModel = new DefaultTableModel(userData, userColumns);
 
+    //Constructor
+    public GUIGame(int rows, String uid) {
+        this.rows = rows;
+        this.myUN = uid;
+        createAndShowBoard();
+    }
+
     public MouseAdapter cardSelectionListener = new MouseAdapter() {
         @Override
         public void mouseReleased(MouseEvent e) {
-            Card cx = (Card) e.getSource();
+            Card c = (Card) e.getSource();
             if(selectEnabled) {
-                if(selected.contains(cx)) {
-                    cx.setSelected(false);
-                    selected.remove(cx);
+                if(selected.contains(c)) {
+                    c.setSelected(false);
+                    selected.remove(c);
                 } else if(selected.size() < 3) {
-                    cx.setEnabled(false);
-                    selected.add(cx);
+                    c.setEnabled(false);
+                    selected.add(c);
                 }
                 String ids = "";
                 for(Card i : selected)
@@ -94,17 +101,12 @@ public class GUIGame extends JPanel{
             t--;
             if(t < 0){
                 timer.stop();
-                //submit the set (Venkat?)
-                //submitSet();
+                //submit the set
+                submitSet(myUN);
                 timer.removeActionListener(this);
             }
         }
     };
-
-    //Constructor
-    public void GUIGame(){
-        createAndShowBoard();
-    }
 
     //Creates JPanel and its characteristics for gameboard
     public void createAndShowBoard() {
