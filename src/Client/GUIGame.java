@@ -9,12 +9,9 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
 
@@ -29,6 +26,8 @@ public class GUIGame extends JPanel{
     public JFrame gameboard = new JFrame("SET");
 
     private JTable userTable;
+
+    public JLabel thumb;
 
     public JPanel cardspace = new JPanel();
     private JPanel scoreboard = new JPanel();
@@ -61,29 +60,7 @@ public class GUIGame extends JPanel{
         this.rows = rows;
         this.myUN = uid;
         cards = Game.createDeck(new ArrayList<>());
-        createAndShowBoard();
-
     }
-
-    public MouseAdapter cardSelectionListener = new MouseAdapter() {
-        @Override
-        public void mouseReleased(MouseEvent e) {
-            Card c = (Card) e.getSource();
-            if(selectEnabled) {
-                if(selected.contains(c)) {
-                    c.setSelected(false);
-                    selected.remove(c);
-                } else if(selected.size() < 3) {
-                    c.setEnabled(false);
-                    selected.add(c);
-                }
-                String ids = "";
-                for(Card i : selected)
-                    ids += i.toString()+"`";
-                //updateCards();
-            }
-        }
-    };
 
     private Timer timer = new Timer(1000, null);
     private int t;
@@ -120,11 +97,26 @@ public class GUIGame extends JPanel{
         gameboard.setPreferredSize(new Dimension(1000, 700));
         gameboard.setResizable(false);
         gameboard.pack();
+        buttons();
 
         users = new JPanel();
         createCardSpace();
 
+        createScoreboard();
+
+        createBanner();
+
+        layoutGame();
+
+        gameboard.setVisible(true);
+
+    }
+
+    public void layoutGame(){
         GridBagConstraints c;
+        GridBagConstraints s;
+        GridBagConstraints b;
+        GridBagConstraints q;
 
         GridBagLayout layout = new GridBagLayout();
 
@@ -132,10 +124,42 @@ public class GUIGame extends JPanel{
         c.gridx = 1;
         c.gridy = 1;
         c.gridwidth = 4;
+        c.gridheight = 3;
 
         gameboard.setLayout(layout);
         gameboard.add(cardspace, c);
 
+        s = new GridBagConstraints();
+        s.gridx = 6;
+        s.gridy = 1;
+        //s.gridwidth = 1;
+        //s.gridheight = 1;
+        s.fill = GridBagConstraints.BOTH;
+        s.anchor = GridBagConstraints.CENTER;
+        s.insets = new Insets(10, 10, 10, 10);
+
+        gameboard.add(userTable, s);
+
+        b = new GridBagConstraints();
+        b.gridx = 6;
+        b.gridy = GridBagConstraints.RELATIVE;
+        b.gridwidth = 1;
+        b.gridheight = 1;
+
+        gameboard.add(setButton, b);
+
+        q = new GridBagConstraints();
+        q.gridx = 0;
+        q.gridy = 0;
+        q.gridwidth = 15;
+        q.gridheight = 1;
+        q.fill = GridBagConstraints.BOTH;
+
+        gameboard.add(thumb, q);
+
+    }
+
+    public void createScoreboard(){
         //Scoreboard
         userModel = new DefaultTableModel(userData, userColumns);
         userTable = new JTable(userModel) {
@@ -149,12 +173,15 @@ public class GUIGame extends JPanel{
         usersLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         users.add(usersLabel);
         users.add(scrollPane1);
-        setAlignmentX(Component.CENTER_ALIGNMENT);
+        //setAlignmentX(Component.CENTER_ALIGNMENT);
         setMaximumSize(new Dimension(200, 10));
-        add(users, BorderLayout.EAST);
+        //add(users, BorderLayout.EAST);
+    }
 
-        gameboard.setVisible(true);
-
+    public void createBanner(){
+        ImageIcon icon = new ImageIcon("./bin/GameBanner.jpg");
+        thumb = new JLabel();
+        thumb.setIcon(icon);
     }
 
     public void createCardSpace(){
@@ -166,14 +193,28 @@ public class GUIGame extends JPanel{
         generateCards(cards);
 
         //Get which cards should be displayed from Server
-
-        for(int i = 0; i < 12; i++) {
+        int cardnum = rows * 4;
+        for(int i = 0; i < cardnum; i++) {
             Card tmp = cards.get(i);
             tmp.setVisible(true);
             tmp.setPreferredSize(new Dimension(20,20));
             tmp.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    System.out.println("YOU PRESSED THE BUTTON.\n");
+                    Card c = (Card) e.getSource();
+                    if(selectEnabled) {
+                        if(selected.contains(c)) {
+                            c.setSelected(false);
+                            selected.remove(c);
+                        } else if(selected.size() < 3) {
+                            c.setEnabled(false);
+                            selected.add(c);
+                            System.out.println("YOU PRESSED THE BUTTON.");
+                        }
+                        String ids = "";
+                        for(Card i : selected)
+                            ids += i.toString()+"`";
+                        //updateCards(ids);
+                    }
                 }
             });
             cardspace.add(tmp);
@@ -268,7 +309,7 @@ public class GUIGame extends JPanel{
     public void addCard(final Card c) {
         int columns = getComponentCount();
         final JPanel lastCol = (JPanel) getComponent(columns-1);
-        c.addMouseListener(cardSelectionListener);
+        //c.addMouseListener(cardSelectionListener);
         cardcount++;
         int cardsInCol = lastCol.getComponentCount();
         if(cardsInCol < rows) {
@@ -319,7 +360,7 @@ public class GUIGame extends JPanel{
 
 
     public static void main(String [] args){
-        GUIGame game = new GUIGame(3,"LOL");
+        GUIGame game = new GUIGame(4,"LOL");
         game.createAndShowBoard();
     }
 

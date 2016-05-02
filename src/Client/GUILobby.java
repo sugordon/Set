@@ -103,15 +103,19 @@ public class GUILobby extends JPanel{
         this.update_game_list(gameData);
 
 
-        String display;
+        String gamename,owner,players;
         try {
-            display = (String) gameTable.getModel().getValueAt(selectedRow, 1);
+            gamename = (String) gameTable.getModel().getValueAt(selectedRow, 0);
+            players = (String) gameTable.getModel().getValueAt(selectedRow,2);
+            owner = (String) gameTable.getModel().getValueAt(selectedRow,1);
         }
         catch(ArrayIndexOutOfBoundsException e){
-            display = "No games";
+            gamename = "No games";
+            players = "";
+            owner = "";
         }
 
-        theOneTruePanel.add(getGamePanel(display));
+        theOneTruePanel.add(getGamePanel(gamename,owner,players));
         theOneTruePanel.add(games);
 
 
@@ -277,15 +281,19 @@ public class GUILobby extends JPanel{
         detachListeners();
         theOneTruePanel.removeAll();
 
-        String display;
+        String gamename,owner,players;
         try {
-            display = (String) gameTable.getModel().getValueAt(selectedRow, 1);
+            gamename= (String) gameTable.getModel().getValueAt(selectedRow, 0);
+            owner= (String) gameTable.getModel().getValueAt(selectedRow, 1);
+            players= (String) gameTable.getModel().getValueAt(selectedRow, 2);
+
         }
         catch(ArrayIndexOutOfBoundsException e){
-            display = "No games";
+            gamename = "No games";
+            owner = "";
+            players = "";
         }
-        display = this.selectedName;
-        theOneTruePanel.add(getGamePanel(display));
+        theOneTruePanel.add(getGamePanel(gamename,owner,players));
         theOneTruePanel.add(games);
         theOneTruePanel.revalidate();
         theOneTruePanel.repaint();
@@ -294,13 +302,14 @@ public class GUILobby extends JPanel{
     }
 
     //Game panel
-    private JPanel getGamePanel(String name) {
+    private JPanel getGamePanel(String name,String owner,String players) {
         JPanel temp = new JPanel();
         temp.setMaximumSize(new Dimension(200,800));
         temp.setLayout(new BoxLayout(temp, BoxLayout.Y_AXIS));
         temp.add(Box.createRigidArea(new Dimension(20,20)));
-        temp.add(new JLabel("<html><h1>"+name+"</h1></html>"));
-        temp.add(new JLabel("<html><p>Players:</p></html>"));
+        temp.add(new JLabel("<html><h1>Game: "+name+"</h1></html>"));
+        temp.add(new JLabel("<html><p>Owner: "+owner+"</p></html>"));
+        temp.add(new JLabel("<html><p>Players: "+players+"</p></html>"));
         temp.add(Box.createVerticalGlue());
         JPanel buttons = new JPanel(new FlowLayout());
         buttons.add(joinGameButton);
