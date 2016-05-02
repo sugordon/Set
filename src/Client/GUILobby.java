@@ -22,7 +22,6 @@ public class GUILobby extends JPanel{
     public JButton logoutButton = new JButton("Logout");
     public JButton joinGameButton = new JButton("Join Game");
     public int selectedRow;
-    String selectedName;
     String[] gameColumnLabels = {"Game Name", "Owner", "Players", "Max Players"};
     ArrayList<Object[]> gameData = new ArrayList<>();
     DefaultTableModel gameModel = new DefaultTableModel();
@@ -192,7 +191,8 @@ public class GUILobby extends JPanel{
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("SENDING JOIN");
-                ClientInit.inStream.println("JOIN,"+selectedName);
+                String gamename= (String) gameTable.getModel().getValueAt(selectedRow, 0);
+                ClientInit.inStream.println("JOIN,"+gamename);
                 try {
                     System.out.println(ClientInit.outStream.readLine());
                 } catch (IOException e1) {
@@ -276,6 +276,7 @@ public class GUILobby extends JPanel{
         }
 
     }
+
 
     public void resetTheOneTruePanel() {
         detachListeners();

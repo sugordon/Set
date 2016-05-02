@@ -96,6 +96,7 @@ public class ClientInit {
         login = new GUILogin();
         login.createAndShowLogin();
         lobby = new GUILobby();
+        game = new GUIGame(4, "LOL");
     }
 
     public static void switchStates(int current, int next){
@@ -112,6 +113,7 @@ public class ClientInit {
                 game.setVisible(true);
                 break;
             case GAME:
+                game.createAndShowBoard();
                 game.setVisible(true);
         }
 

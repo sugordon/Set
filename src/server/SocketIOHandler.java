@@ -39,6 +39,7 @@ public class SocketIOHandler{
                         output = "ACK_LOGIN,SUCCESS,LOBBY";
                         state = LOBBY;
                         _thread.setPlayer(s[1]);
+                        System.out.println("SET PLAYER TO "+s[1]);
                         ServerInit.allThreads.put(s[1], _thread);
                     }
                     else {
@@ -99,6 +100,7 @@ public class SocketIOHandler{
                     System.out.println("RECIEVED JOIN to " + s[1]);
                     ServerInit.gameRooms.get(s[1]);
                     Game g = _thread.getGame();
+                    System.out.println("GET PLAYER TO "+_thread.getPlayer());
                     g.addPlayer(_thread.getPlayer());
                     output = "ACK_JOIN,SUCCESS";
                 }
