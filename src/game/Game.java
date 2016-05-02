@@ -39,7 +39,6 @@ public class Game {
 		this.owner = owner;
 		this.maxPlayers = numPlayers;
 		this.pwd = pwd;
-		players.add(new Player(owner));
 
 		deck = Game.createDeck(deck);
 		Collections.shuffle(deck);
@@ -49,9 +48,6 @@ public class Game {
 		}
 		for (CardSet s : allSets) {
 			System.out.println(s.toString());
-		}
-		for (int i = 0; i < numPlayers; i++) {
-			players.add(new Player("Bill"));
 		}
 
 		lockTimer = new Timer(3000, new ActionListener() {
@@ -199,6 +195,14 @@ public class Game {
 
 	public String getPwd() {
 		return pwd;
+	}
+
+	public String toString() {
+		String s = "";
+		for (Card c : board) {
+			s += c.toString();
+		}
+		return s+":";
 	}
 
 	public static void main(String[] args) {

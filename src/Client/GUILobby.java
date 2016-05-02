@@ -22,6 +22,7 @@ public class GUILobby extends JPanel{
     public JButton logoutButton = new JButton("Logout");
     public JButton joinGameButton = new JButton("Join Game");
     public int selectedRow;
+    String selectedName;
     String[] gameColumnLabels = {"Game Name", "Owner", "Players", "Max Players"};
     ArrayList<Object[]> gameData = new ArrayList<>();
     DefaultTableModel gameModel = new DefaultTableModel();
@@ -137,6 +138,7 @@ public class GUILobby extends JPanel{
         ListSelectionListener lsl = new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
+                System.out.println("ASDF");
                 if(e.getValueIsAdjusting()) return;
                 ListSelectionModel lsm = (ListSelectionModel) e.getSource();
                 if(!lsm.isSelectionEmpty()) {
@@ -185,7 +187,14 @@ public class GUILobby extends JPanel{
         joinGameButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //TODO : GORDON
+                System.out.println("SENDING JOIN");
+                ClientInit.inStream.println("JOIN,"+selectedName);
+                try {
+                    System.out.println(ClientInit.outStream.readLine());
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+                ClientInit.switchStates(ClientInit.LOBBY, ClientInit.GAME);
             }
         });
 
@@ -198,27 +207,26 @@ public class GUILobby extends JPanel{
         System.out.println("HIHI");
         ClientInit.inStream.println("GAMES");
         System.out.println("SENT");
-        String s = null;
-        /*
-        try {
-            while ((s = ClientInit.outStream.readLine()) == null);
-        } catch (IOException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Error loading Games");
-        }
-        System.out.println(s);
-
-        gameData.clear();
-        String[] sents = s.split(":");
-        for (String sent : Arrays.copyOfRange(sents, 1, sents.length-1)) {
-            gameData.add(sent.split(","));
-        }
-        Object tmp[][] = new Object[gameData.size()][4];
-        tmp = gameData.toArray(tmp);
-        gameModel = new DefaultTableModel(tmp, gameColumnLabels);
-        gameTable.setModel(gameModel);
-        formatTable(gameTable);
-        */
+//        String s = null;
+//        try {
+//            while ((s = ClientInit.outStream.readLine()) == null);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            JOptionPane.showMessageDialog(null, "Error loading Games");
+//        }
+//        System.out.println(s);
+//
+//        gameData.clear();
+//        String[] sents = s.split(":");
+//        for (String sent : Arrays.copyOfRange(sents, 1, sents.length-1)) {
+//            gameData.add(sent.split(","));
+//        }
+//        Object tmp[][] = new Object[gameData.size()][4];
+//        tmp = gameData.toArray(tmp);
+//        gameModel = new DefaultTableModel(tmp, gameColumnLabels);
+//        gameTable.setModel(gameModel);
+//        formatTable(gameTable);
+//        System.out.println("DONE WITH METHOD");
     }
 
     private void disconnect_from_server(){
@@ -276,6 +284,7 @@ public class GUILobby extends JPanel{
         catch(ArrayIndexOutOfBoundsException e){
             display = "No games";
         }
+        display = this.selectedName;
         theOneTruePanel.add(getGamePanel(display));
         theOneTruePanel.add(games);
         theOneTruePanel.revalidate();
