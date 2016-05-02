@@ -13,7 +13,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by Bridget on 3/15/2016.
@@ -44,6 +45,8 @@ public class GUIGame extends JPanel{
     private ArrayList<Card> selected = new ArrayList<Card>(); //List of selected cards
     private HashMap<String, Location> cardMap = new HashMap<String, Location>();
 
+    public Timer timer = new Timer();
+
     String[] userColumns = {"Name",
             "Ranking"};
 
@@ -62,8 +65,34 @@ public class GUIGame extends JPanel{
         cards = Game.createDeck(new ArrayList<>());
     }
 
-    private Timer timer = new Timer(1000, null);
-    private int t;
+    class submitSETTimer extends TimerTask {
+        public void run() {
+            System.out.println("Time's up! Submitted SET");
+            setButton.setText("SET");
+            selectDisable();
+            int cardnum = rows * 4;
+            for(int i = 0; i < cardnum; i++) {
+                Card tmp = cards.get(i);
+                tmp.setBorderPainted(false);
+                tmp.setSelected(false);
+                selected.remove(tmp);
+            }
+            submitSet(myUN);
+            //timer.cancel();
+        }
+    }
+
+    class enableSETTimer extends TimerTask {
+        public void run() {
+            System.out.println("Time's up for opponent! Reenabling SET button.");
+            setButton.setEnabled(true);
+            //timer.cancel();
+        }
+    }
+
+    //private Timer timer = new Timer(1000, null);
+    //private int t;
+    /*
     private ActionListener setPress = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent event) {
@@ -76,6 +105,7 @@ public class GUIGame extends JPanel{
             }
         }
     };
+
     private ActionListener countdownSet = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -88,12 +118,13 @@ public class GUIGame extends JPanel{
             }
         }
     };
+    */
 
     //Creates JPanel and its characteristics for gameboard
     public void createAndShowBoard() {
         gameboard.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        gameboard.getContentPane().setBackground(new Color(168, 168, 168));
+        gameboard.getContentPane().setBackground(new Color(99, 111, 115));
         gameboard.setPreferredSize(new Dimension(1000, 700));
         gameboard.setResizable(false);
         gameboard.pack();
@@ -161,6 +192,7 @@ public class GUIGame extends JPanel{
 
     public void createScoreboard(){
         //Scoreboard
+        userData = updateScoreboard(userData);
         userModel = new DefaultTableModel(userData, userColumns);
         userTable = new JTable(userModel) {
             @Override //Disable editing
@@ -176,6 +208,18 @@ public class GUIGame extends JPanel{
         //setAlignmentX(Component.CENTER_ALIGNMENT);
         setMaximumSize(new Dimension(200, 10));
         //add(users, BorderLayout.EAST);
+    }
+
+    private Object [][] updateScoreboard(Object [][] Scoredata){
+        userData = Scoredata;
+
+        java.util.Arrays.sort(userData, new java.util.Comparator<Object[]>() {
+            public int compare(Object[] a, Object[] b) {
+                return -Integer.compare((Integer) a[1], (Integer) b[1]);
+            }
+        });
+
+        return userData;
     }
 
     public void createBanner(){
@@ -203,10 +247,14 @@ public class GUIGame extends JPanel{
                     Card c = (Card) e.getSource();
                     if(selectEnabled) {
                         if(selected.contains(c)) {
+                            //c.setEnabled(true);
                             c.setSelected(false);
+                            c.setBorderPainted(false);
                             selected.remove(c);
                         } else if(selected.size() < 3) {
-                            c.setEnabled(false);
+                            //c.setEnabled(false);
+                            c.setBorderPainted(true);
+                            c.setSelected(true);
                             selected.add(c);
                             System.out.println("YOU PRESSED THE BUTTON.");
                         }
@@ -225,6 +273,10 @@ public class GUIGame extends JPanel{
         cardspace.setVisible(true);
     }
 
+    public void createTimerPanel(){
+        JLabel timerLabel = new JLabel();
+        timerLabel.setText(timer.toString());
+    }
 
     public void generateCards(ArrayList<game.Card> cards) {
         try {
@@ -239,7 +291,8 @@ public class GUIGame extends JPanel{
 //                ImageIcon img = new ImageIcon(getClass().getResource("images_cards/0000.gif"));
 //                tmp.setIcon(img);
                 tmp.setIcon(new ImageIcon(img));
-                tmp.setBorder(BorderFactory.createEmptyBorder());
+                tmp.setBorder(BorderFactory.createLineBorder(new Color(6, 138, 10), 10));
+                tmp.setBorderPainted(false);
                 tmp.setContentAreaFilled(false);
             }
         } catch (IOException e) {
@@ -249,17 +302,12 @@ public class GUIGame extends JPanel{
     }
     //Disables the SET button for a specified amount of time after it's been pressed
     public void disableSET(final int time) {
-        if(time != 0) {
-            t = time;
-            setButton.setEnabled(false);
-            timer.addActionListener(setPress);
-            timer.setInitialDelay(0);
-            timer.start();
-        } else {
-            setButton.setEnabled(false);
-        }
+        setButton.setEnabled(false);
+        TimerTask enable = new enableSETTimer();
+        timer.schedule(enable, 5000);  //3000 milliseconds = 3 seconds
     }
 
+    /*
     //timer countdown for picking a SET
     public void setTimer(final int time) {
         t = time;
@@ -268,17 +316,31 @@ public class GUIGame extends JPanel{
         timer.setInitialDelay(0);
         timer.start();
     }
+    */
 
     public void buttons(){
         setButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
-                if(!timer.isRunning()) {
+                //setButton.setEnabled(false);
+                //if(!timer.isRunning()) {
                     //Start accepting a possible set
+                if(selectEnabled == true)
+                {
+                    submitSet(myUN);
+                    int cardnum = rows * 4;
+                    for(int i = 0; i < cardnum; i++) {
+                        Card tmp = cards.get(i);
+                        tmp.setBorderPainted(false);
+                        tmp.setSelected(false);
+                        selected.remove(tmp);
+                    }
+                    //System.out.print(selected.get(0).toString());
+                }
+                else {
                     selectEnable();
-                    //Systems integration- Venkat
-                } else {
-                    //submitSet();
-                    selectDisable();
+                    setButton.setText("SUBMIT");
+                    TimerTask submit = new submitSETTimer();
+                    timer.schedule(submit, 5000);     //3000 milliseconds = 3 seconds
                 }
             }
         });
@@ -293,7 +355,7 @@ public class GUIGame extends JPanel{
         selectEnabled = false;
     }
 
-    private void submitSet(String username) {
+    private void submitSet(String username){
         //Gordon?
     }
 
