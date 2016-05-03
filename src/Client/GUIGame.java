@@ -12,7 +12,6 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -23,6 +22,8 @@ public class GUIGame extends JPanel{
 
     // Toggle button so it grays out when pressed
     public ArrayList<game.Card> cards = new ArrayList<>();     //Array of cards, in a grid
+
+    public game.Board board;
 
     public JFrame gameboard = new JFrame("SET");
 
@@ -35,15 +36,14 @@ public class GUIGame extends JPanel{
     private JPanel users;
 
     public JButton setButton = new JButton("SET");
-    private JButton refreshScoreboard = new JButton("Refresh");
-
+    public JButton removeButton = new JButton("REMOVE");
     public String myUN;
     public int cardcount = 0;
     public int rows;
+    public int cols = 3;
     private boolean selectEnabled = false;
 
     private ArrayList<Card> selected = new ArrayList<Card>(); //List of selected cards
-    private HashMap<String, Location> cardMap = new HashMap<String, Location>();
 
     public Timer timer = new Timer();
 
@@ -62,6 +62,7 @@ public class GUIGame extends JPanel{
     public GUIGame(int rows, String uid) {
         this.rows = rows;
         this.myUN = uid;
+        board = new game.Board();
         cards = Game.createDeck(new ArrayList<>());
     }
 
@@ -70,14 +71,14 @@ public class GUIGame extends JPanel{
             System.out.println("Time's up! Submitted SET");
             setButton.setText("SET");
             selectDisable();
-            int cardnum = rows * 4;
+            int cardnum = rows * cols;
             for(int i = 0; i < cardnum; i++) {
                 Card tmp = cards.get(i);
                 tmp.setBorderPainted(false);
                 tmp.setSelected(false);
                 selected.remove(tmp);
             }
-            submitSet(myUN);
+            submitSet(myUN, selected);
             //timer.cancel();
         }
     }
@@ -90,36 +91,6 @@ public class GUIGame extends JPanel{
         }
     }
 
-    //private Timer timer = new Timer(1000, null);
-    //private int t;
-    /*
-    private ActionListener setPress = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent event) {
-            setButton.setEnabled(false);
-            t--;
-            if(t < 0){
-                timer.stop();
-                setButton.setEnabled(true);
-                timer.removeActionListener(this);
-            }
-        }
-    };
-
-    private ActionListener countdownSet = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            t--;
-            if(t < 0){
-                timer.stop();
-                //submit the set
-                submitSet(myUN);
-                timer.removeActionListener(this);
-            }
-        }
-    };
-    */
-
     //Creates JPanel and its characteristics for gameboard
     public void createAndShowBoard() {
         gameboard.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -129,6 +100,20 @@ public class GUIGame extends JPanel{
         gameboard.setResizable(false);
         gameboard.pack();
         buttons();
+
+
+        //TEST CODE
+        removeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ArrayList<Card> cardset = new ArrayList<Card>();
+                cardset.add(board.get(0,0));
+                cardset.add(board.get(0,1));
+                cardset.add(board.get(0,2));
+                ArrayList<Card> newCards = new ArrayList<Card>(cardset);
+                updateCards(cardset,newCards);
+            }
+        });
 
         users = new JPanel();
         createCardSpace();
@@ -144,10 +129,7 @@ public class GUIGame extends JPanel{
     }
 
     public void layoutGame(){
-        GridBagConstraints c;
-        GridBagConstraints s;
-        GridBagConstraints b;
-        GridBagConstraints q;
+        GridBagConstraints c, s, b, q, r, t;
 
         GridBagLayout layout = new GridBagLayout();
 
@@ -173,11 +155,17 @@ public class GUIGame extends JPanel{
 
         b = new GridBagConstraints();
         b.gridx = 6;
-        b.gridy = GridBagConstraints.RELATIVE;
+        b.gridy = 3;
         b.gridwidth = 1;
         b.gridheight = 1;
 
         gameboard.add(setButton, b);
+
+        t = new GridBagConstraints();
+        t.gridx = 6;
+        t.gridy = GridBagConstraints.RELATIVE;
+
+        gameboard.add(removeButton, t);
 
         q = new GridBagConstraints();
         q.gridx = 0;
@@ -188,11 +176,12 @@ public class GUIGame extends JPanel{
 
         gameboard.add(thumb, q);
 
+
     }
 
     public void createScoreboard(){
         //Scoreboard
-        userData = updateScoreboard(userData);
+        userData = sortScoreboard(userData);
         userModel = new DefaultTableModel(userData, userColumns);
         userTable = new JTable(userModel) {
             @Override //Disable editing
@@ -210,7 +199,7 @@ public class GUIGame extends JPanel{
         //add(users, BorderLayout.EAST);
     }
 
-    private Object [][] updateScoreboard(Object [][] Scoredata){
+    private Object [][] sortScoreboard(Object [][] Scoredata){
         userData = Scoredata;
 
         java.util.Arrays.sort(userData, new java.util.Comparator<Object[]>() {
@@ -237,7 +226,7 @@ public class GUIGame extends JPanel{
         generateCards(cards);
 
         //Get which cards should be displayed from Server
-        int cardnum = rows * 4;
+        int cardnum = rows * cols;
         for(int i = 0; i < cardnum; i++) {
             Card tmp = cards.get(i);
             tmp.setVisible(true);
@@ -258,14 +247,11 @@ public class GUIGame extends JPanel{
                             selected.add(c);
                             System.out.println("YOU PRESSED THE BUTTON.");
                         }
-                        String ids = "";
-                        for(Card i : selected)
-                            ids += i.toString()+"`";
-                        //updateCards(ids);
                     }
                 }
             });
             cardspace.add(tmp);
+            board.insert(tmp);
         }
 
 
@@ -273,14 +259,9 @@ public class GUIGame extends JPanel{
         cardspace.setVisible(true);
     }
 
-    public void createTimerPanel(){
-        JLabel timerLabel = new JLabel();
-        timerLabel.setText(timer.toString());
-    }
-
     public void generateCards(ArrayList<game.Card> cards) {
         try {
-            for (int i = 0; i < 81; i++) {
+            for (int i = 0; i < cards.size(); i++) {
                 Card tmp = cards.get(i);
                 String path = "./bin/" + tmp.toString() + ".gif";
                 File f = new File(path);
@@ -307,17 +288,6 @@ public class GUIGame extends JPanel{
         timer.schedule(enable, 5000);  //3000 milliseconds = 3 seconds
     }
 
-    /*
-    //timer countdown for picking a SET
-    public void setTimer(final int time) {
-        t = time;
-        //enable highlighting/selecting cards
-        timer.addActionListener(countdownSet);
-        timer.setInitialDelay(0);
-        timer.start();
-    }
-    */
-
     public void buttons(){
         setButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
@@ -326,8 +296,8 @@ public class GUIGame extends JPanel{
                     //Start accepting a possible set
                 if(selectEnabled == true)
                 {
-                    submitSet(myUN);
-                    int cardnum = rows * 4;
+                    submitSet(myUN, selected);
+                    int cardnum = rows * cols;
                     for(int i = 0; i < cardnum; i++) {
                         Card tmp = cards.get(i);
                         tmp.setBorderPainted(false);
@@ -344,7 +314,6 @@ public class GUIGame extends JPanel{
                 }
             }
         });
-
     }
 
     public void selectEnable(){
@@ -355,69 +324,76 @@ public class GUIGame extends JPanel{
         selectEnabled = false;
     }
 
-    private void submitSet(String username){
-        //Gordon?
+    private void submitSet(String username, ArrayList<Card> selected){
+        //Gordon fill in
     }
 
-    public void updateCards(Card cards[], boolean [] remove){
-        //Gordon?
+    //Replace cards selected with new cards
+    //Gordon calls this
+    public void updateCards(ArrayList<Card> discardCards,ArrayList<Card> newCards){
+        for(int i = 0; i < discardCards.size(); i++ ) {
+            cardspace.remove(discardCards.get(i));
+        }
+        int size = 0;
+        if(newCards != null) {
+            size = newCards.size();
+            generateCards(newCards);
+
+            for (int i = 0; i < size; i++){
+                System.out.println("Addign new card");
+                Card tmp = newCards.get(i);
+                board.insert(tmp);
+                tmp.setVisible(true);
+                tmp.setPreferredSize(new Dimension(20, 20));
+                tmp.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        Card c = (Card) e.getSource();
+                        if (selectEnabled) {
+                            if (selected.contains(c)) {
+                                //c.setEnabled(true);
+                                c.setSelected(false);
+                                c.setBorderPainted(false);
+                                selected.remove(c);
+                            } else if (selected.size() < 3) {
+                                //c.setEnabled(false);
+                                c.setBorderPainted(true);
+                                c.setSelected(true);
+                                selected.add(c);
+                                System.out.println("YOU PRESSED THE BUTTON.");
+                            }
+                        }
+                    }
+                });
+                cardspace.add(tmp);
+            }
+        }
+        else
+            System.out.printf("newCards is null");
+        cardspace.revalidate();
+        cardspace.repaint();
     }
 
     //If there isn't a valid set, the size of the board grid has to increase
+    //Gordon calls this
     public void updateGrid(){
-
+        cols += 1;
     }
 
-    public void addCard(final Card c) {
-        int columns = getComponentCount();
-        final JPanel lastCol = (JPanel) getComponent(columns-1);
-        //c.addMouseListener(cardSelectionListener);
-        cardcount++;
-        int cardsInCol = lastCol.getComponentCount();
-        if(cardsInCol < rows) {
-            cardMap.put(c.toString(), new Location(columns-1,cardsInCol));
-        } else { //column full - add a new column
-            JPanel temp = new JPanel(new GridLayout(rows, 1, 3, 3));
-            add(temp);
-            cardMap.put(c.toString(), new Location(columns,0));
+    //Gordon calls this
+    public void updateScoreboard(Object [][] data) {
+        for(int i=2; i<data.length; i+=4) {
+            scoreboard.add(new JLabel(data[i+1]+" Score: "+data[i+2]));
         }
-        revalidate();
+        userData = data;
+        createScoreboard();
+        scoreboard.revalidate();
     }
-
 
     private void formatTable(JTable t) {
         t.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         t.getColumnModel().getColumn(0).setPreferredWidth(140);
         t.getColumnModel().getColumn(1).setPreferredWidth(60);
         t.setAutoCreateRowSorter(true);
-    }
-
-    private JPanel getScoreboard(int id, String name) {
-        //Get scoreboard data from Gordon?
-        JPanel temp = new JPanel();
-        temp.setLayout(new BoxLayout(temp, BoxLayout.Y_AXIS));
-        scoreboard.setLayout(new BoxLayout(scoreboard, BoxLayout.Y_AXIS));
-        temp.add(Box.createRigidArea(new Dimension(20,20)));
-        temp.add(scoreboard);
-        temp.add(Box.createVerticalGlue());
-        return temp;
-    }
-
-    public void updateScoreboard(String[] data) {
-        for(int i=2; i<data.length; i+=4) {
-            scoreboard.add(new JLabel(data[i+1]+" Score: "+data[i+2]));
-        }
-        scoreboard.revalidate();
-    }
-
-    private class Location {
-        public int col;
-        public int row;
-
-        public Location(int c, int r) {
-            this.col = c;
-            this.row = r;
-        }
     }
 
 
