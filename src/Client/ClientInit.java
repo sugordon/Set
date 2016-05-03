@@ -20,7 +20,8 @@ public class ClientInit {
 
     public static int STATE = 0;
 
-    private static String HOST = "sable06.ee.cooper.edu";
+    //private static String HOST = "sable06.ee.cooper.edu";
+    private static String HOST = "localhost";
     private static int PORT = 7100;
     public static Socket sck;
 
@@ -95,6 +96,7 @@ public class ClientInit {
         login = new GUILogin();
         login.createAndShowLogin();
         lobby = new GUILobby();
+        game = new GUIGame(4, "LOL");
     }
 
     public static void switchStates(int current, int next){
@@ -111,6 +113,7 @@ public class ClientInit {
                 game.setVisible(true);
                 break;
             case GAME:
+                game.createAndShowBoard();
                 game.setVisible(true);
         }
 

@@ -32,7 +32,7 @@ public class ServerMultiThread extends Thread {
     }
 
     public String getPlayer() {
-        return current_player;
+        return this.current_player;
     }
 
     public void run(){

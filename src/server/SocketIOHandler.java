@@ -39,6 +39,7 @@ public class SocketIOHandler{
                         output = "ACK_LOGIN,SUCCESS,LOBBY";
                         state = LOBBY;
                         _thread.setPlayer(s[1]);
+                        System.out.println("SET PLAYER TO "+s[1]);
                         ServerInit.allThreads.put(s[1], _thread);
                     }
                     else {
@@ -46,8 +47,8 @@ public class SocketIOHandler{
                     }
                     //s[1] contains username
                     //s[2] contains password (in plaintext for now; may implement encryption later)
-                }
-                else if(s[0].equals("REGISTER")) {
+                } else
+                if(s[0].equals("REGISTER")) {
                     state = LOGIN;
                     System.out.println("Register request");
                     switch (Database.newUser(s[1], s[2])) {
@@ -62,19 +63,19 @@ public class SocketIOHandler{
                             break;
                     }
                 }
-                else output = "BAD_VALUE,LOGIN";    //invalid data received from
                 break;
             case LOBBY:
                 if (s[0].equals("GAMES")) {
+                    state = LOBBY;
                     output = "ACK_GAMES,SUCCESS:";
                     for (Game g : ServerInit.gameRooms.values()) {
-                        output +=  g.toString();
+                        output +=  g.getGameName()+","+g.getOwner()+","+g.getPlayers().size()+","+g.getMaxPlayers()+":";
                     }
                     if (ServerInit.gameRooms.size() == 0) {
                         output += ":";
                     }
                     output += "ROOM";
-                }
+                } else
                 //List of all games
                 if(s[0].equals("CREATE")) {
                     //Current user does not have a game, assumes all input is valid
@@ -84,7 +85,8 @@ public class SocketIOHandler{
                         _thread.setGame(g);
                         ServerInit.gameRooms.put(s[1], g);
                         output = "ACK_CREATE,SUCCESS," + s[1] + ",ROOM";
-                        state = ROOM;
+                        //state = ROOM;
+                        state = LOBBY;
                     }
                     else {
                         output = "ACK_CREATE,FAILURE,GAME";
@@ -93,6 +95,14 @@ public class SocketIOHandler{
                     //s[1] contains room/game name
                     //s[2] contains max_players - default = 4; max = 30 (so whole class can play at once)
                     //s[3] contains password (optional)
+                } else
+                if (s[0].equals("JOIN")) {
+                    System.out.println("RECIEVED JOIN to " + s[1]);
+                    ServerInit.gameRooms.get(s[1]);
+                    Game g = _thread.getGame();
+                    System.out.println("GET PLAYER TO "+_thread.getPlayer());
+                    g.addPlayer(_thread.getPlayer());
+                    output = "ACK_JOIN,SUCCESS";
                 }
                 break;
             case ROOM:
@@ -122,6 +132,9 @@ public class SocketIOHandler{
             default:
                 System.out.println("UNKNOWN STATE!!");
                 break;
+        }
+        if (output.isEmpty()) {
+            output = "BAD_VALUE,"+state;    //invalid data received from
         }
         return output;
     }
