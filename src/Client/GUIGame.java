@@ -36,7 +36,7 @@ public class GUIGame extends JPanel{
     private JPanel users;
 
     public JButton setButton = new JButton("SET");
-    public JButton removeButton = new JButton("REMOVE");
+    //public JButton removeButton = new JButton("REMOVE");
     public String myUN;
     public int cardcount = 0;
     public int rows;
@@ -101,7 +101,7 @@ public class GUIGame extends JPanel{
         gameboard.pack();
         buttons();
 
-
+        /*
         //TEST CODE
         removeButton.addActionListener(new ActionListener() {
             @Override
@@ -114,6 +114,7 @@ public class GUIGame extends JPanel{
                 updateCards(cardset,newCards);
             }
         });
+        */
 
         users = new JPanel();
         createCardSpace();
@@ -129,7 +130,7 @@ public class GUIGame extends JPanel{
     }
 
     public void layoutGame(){
-        GridBagConstraints c, s, b, q, r, t;
+        GridBagConstraints c, s, b, q;
 
         GridBagLayout layout = new GridBagLayout();
 
@@ -160,12 +161,6 @@ public class GUIGame extends JPanel{
         b.gridheight = 1;
 
         gameboard.add(setButton, b);
-
-        t = new GridBagConstraints();
-        t.gridx = 6;
-        t.gridy = GridBagConstraints.RELATIVE;
-
-        gameboard.add(removeButton, t);
 
         q = new GridBagConstraints();
         q.gridx = 0;
