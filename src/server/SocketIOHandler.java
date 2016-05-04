@@ -113,10 +113,15 @@ public class SocketIOHandler{
 //                    System.out.println("RECIEVED JOIN to " + s[1]);
                     Game g = ServerInit.gameRooms.get(s[1]);
 //                    System.out.println("GET PLAYER TO "+_thread.getPlayer());
-                    g.addPlayer(_thread.getPlayer(), _thread);
-                    _thread.setGame(g);
-                    output = "ACK_JOIN,SUCCESS,GAME";
-                    state = GAME;
+                    if(g.getMaxPlayers() > g.getPlayers().size()) {
+                        g.addPlayer(_thread.getPlayer(), _thread);
+                        _thread.setGame(g);
+                        output = "ACK_JOIN,SUCCESS,GAME";
+                        state = GAME;
+                    }
+                    else{
+                        output = "ACK_JOIN,FAILURE,LOBBY";
+                    }
                 }
                 break;
             case ROOM:
