@@ -159,14 +159,14 @@ public class Game {
 
     public boolean removePlayer(String player) {
         Player a = null;
-        for (Player p : this.getPlayers()) {
+        for (Player p : players) {
             if (p.getName().equals(player)) {
-                a = p;
+				a = p;
+               players.remove(p);
             }
         }
         if (a == null)
             return false;
-        this.getPlayers().remove(a);
         return true;
     }
 
