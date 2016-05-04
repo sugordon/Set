@@ -94,6 +94,8 @@ public class GUIGame extends JPanel{
             @Override
             public void windowClosing(WindowEvent e) {
                 //TODO: Add proper exit behavior
+                ClientInit.inStream.println("END_CONN");
+
                 super.windowClosing(e);
 
                 try {
