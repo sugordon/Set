@@ -148,7 +148,7 @@ public class GUILogin extends JPanel{
             }
             else if(tokens[0].equals("ACK_REGISTER")) {
                 if (tokens[1].equals("SUCCESS")) {
-                    response = "Successfully Regi)stered.  Please log in";
+                    response = "Successfully Registered.  Please log in";
                     JOptionPane.showMessageDialog(null, response);
                 } else if (tokens[1].equals("FAILURE")){
                     response = "Unable to register.  Please try again";

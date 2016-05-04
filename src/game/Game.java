@@ -25,9 +25,9 @@ public class Game {
 	private ArrayList<Card> deck = new ArrayList<Card>(81);
 	private Board board = new Board();
 	private ArrayList<Player> players = new ArrayList<Player>();
-	private String lock = null;
+	private volatile String lock = null;
 	public HashSet<CardSet> allSets = new HashSet<CardSet>();
-	private Timer lockTimer;
+	public Timer lockTimer;
     public ArrayList<ServerMultiThread> threads = new ArrayList<>();
 
     public static final int LOCKTIME = 5000;
@@ -91,13 +91,10 @@ public class Game {
 	}
 
 	public boolean lock(String playerNum) {
-		if (lock != null) {
-			return false;
-		}
-		System.out.println("lock");
+		System.out.println("lock " + playerNum);
 		lock = playerNum;
 		//Resets the lock after 3 seconds
-		lockTimer.start();
+//		lockTimer.start();
 		return true;
 	}
 
@@ -109,6 +106,9 @@ public class Game {
 				break;
 			}
 		}
+        if (this.lock != name) {
+            return 2;
+        }
         int playerNum = this.getPlayers().indexOf(p);
         int[] one = this.board.find(new Card(sOne));
         int[] two = this.board.find(new Card(sTwo));

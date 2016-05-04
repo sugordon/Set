@@ -1,5 +1,7 @@
 package server;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -7,6 +9,8 @@ import java.util.ArrayList;
 import game.Game;
 import game.Player;
 import network.Database;
+
+import javax.swing.*;
 
 public class SocketIOHandler{
 
@@ -128,8 +132,18 @@ public class SocketIOHandler{
                     output = "ACK_UPDATE,UPDATE,GAME";
                 } else if (s[0].equals("LOCK")) {
                     g.lock(_thread.getPlayer());
-                    output = "ACK_LOCK,"+_thread.getPlayer()+",GAME";
-                    this.sendAll(g.threads, output);
+                    output = "LOCK,"+_thread.getPlayer()+",GAME";
+                    Timer lt = new Timer(Game.LOCKTIME, new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            System.out.println("SENDFAILURE");
+                            sendAll("ACK_REPLACE,FAILURE,"+_thread.getPlayer()+","+",GAME");
+                            g.lock(null);
+                        }
+                    });
+                    lt.setRepeats(false);
+                    lt.start();
+                    this.sendAll(output);
                 } else if (s[0].equals("REPLACE")) {
                     int success = g.replace(s[1], s[2], s[3], this._thread.getPlayer());
                     if (success == 0) {
@@ -138,9 +152,10 @@ public class SocketIOHandler{
                             output += c.toString() + ",";
                         }
                     } else {
-                        output += "FAILURE,"+this._thread.getPlayer()+","+success+",";
+                        output = "ACK_REPLACE,FAILURE,"+this._thread.getPlayer()+",";
                     }
                     output += "GAME";
+                    this.sendAll(output);
                 }
                 break;
 
@@ -149,15 +164,17 @@ public class SocketIOHandler{
                 break;
         }
         if (output.isEmpty()) {
-            output = "BAD_VALUE,"+state;    //invalid data received from
+            output = "BAD_VALUE,"+input+","+state;    //invalid data received from
         }
         return output;
     }
 
-    private void sendAll(ArrayList<ServerMultiThread> threads, String output) {
-        for (ServerMultiThread th : threads) {
+    private void sendAll(String output) {
+        for (ServerMultiThread th : _thread.getGame().threads) {
             if (th != _thread) {
                 th.outStream.println(output);
+            } else {
+                System.out.println("OTHER");
             }
         }
     }

@@ -5,6 +5,7 @@ import game.Game;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -12,9 +13,6 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * Created by Bridget on 3/15/2016.
@@ -42,12 +40,11 @@ public class GUIGame extends JPanel{
     public int cardcount = 0;
     public int rows;
     public int cols = 3;
-    private boolean lockedOut = false;
     private String userLocked;
 
     private ArrayList<Card> selected = new ArrayList<Card>(); //List of selected cards
 
-    public Timer timer = new Timer();
+    public Timer timer;
 
     String[] userColumns = {"Name",
             "Score"};
@@ -66,8 +63,9 @@ public class GUIGame extends JPanel{
         cards = Game.createDeck(new ArrayList<>());
     }
 
-    class submitSETTimer extends TimerTask {
-        public void run() {
+    class submitSETTimer implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
             System.out.println("Time's up! Submitted SET");
             setButton.setText("SET");
             int cardnum = rows * cols;
@@ -77,17 +75,18 @@ public class GUIGame extends JPanel{
                 tmp.setSelected(false);
                 selected.remove(tmp);
             }
-            submitSet(myUN, selected);
+            if (myUN.equals(userLocked))
+                submitSet(myUN, selected);
             //timer.cancel();
         }
     }
 
-    class enableSETTimer extends TimerTask {
-        public void run() {
-//            System.out.println("Time's up for opponent! Reenabling SET button.");
+    class enableSET implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            System.out.println("No longer disabled");
             setButton.setEnabled(true);
             setButton.setText("Set");
-            //timer.cancel();
         }
     }
 
@@ -128,7 +127,7 @@ public class GUIGame extends JPanel{
         layoutGame();
 
         gameboard.setVisible(true);
-
+        gameboard.setTitle(this.myUN);
     }
 
     public void layoutGame(){
@@ -228,25 +227,6 @@ public class GUIGame extends JPanel{
             Card tmp = cards.get(i);
             tmp.setVisible(true);
             tmp.setPreferredSize(new Dimension(20,20));
-//            tmp.addActionListener(new ActionListener() {
-//                public void actionPerformed(ActionEvent e) {
-//                    Card c = (Card) e.getSource();
-//                    if(lockedOut) {
-//                        if(selected.contains(c)) {
-//                            //c.setEnabled(true);
-//                            c.setSelected(false);
-//                            c.setBorderPainted(false);
-//                            selected.remove(c);
-//                        } else if(selected.size() < 3) {
-//                            //c.setEnabled(false);
-//                            c.setBorderPainted(true);
-//                            c.setSelected(true);
-//                            selected.add(c);
-//                            System.out.println("YOU PRESSED THE BUTTON.");
-//                        }
-//                    }
-//                }
-//            });
             cardspace.add(tmp);
             board.insert(tmp);
         }
@@ -288,13 +268,6 @@ public class GUIGame extends JPanel{
                             selected.add(c);
                             System.out.println("YOU PRESSED THE BUTTON. " + c.toString());
                         }
-                        if (setButton.isEnabled()) {
-                            if (selected.size() == 3) {
-                                setButton.setText("SUBMIT");
-                            } else {
-                                setButton.setText("SET");
-                            }
-                        }
                     }
                 });
             }
@@ -304,53 +277,46 @@ public class GUIGame extends JPanel{
         //return cards;
     }
     //Disables the SET button for a specified amount of time after it's been pressed
-    public void disableSET() {
-        setButton.setEnabled(false);
-        setButton.setText("Disabled");
-        TimerTask enable = new enableSETTimer();
-        timer.schedule(enable, Game.LOCKTIME);  //3000 milliseconds = 3 seconds
-    }
 
     public void buttons(){
         setButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
-                //setButton.setEnabled(false);
-                //if(!timer.isRunning()) {
+                System.out.println("BUTTON PRESSED");
                 //Start accepting a possible set
-//                if(lockedOut == true)
-                if(lockedOut == false)
+                if (userLocked == null || userLocked.equals(myUN))
                 {
-                    if (selected.size() == 3) {
-                        submitSet(myUN, selected);
-                        timer.cancel();
-                        setButton.setText("SET");
-                        int cardnum = rows * cols;
-                        for (int i = 0; i < cardnum; i++) {
-                            Card tmp = cards.get(i);
-                            tmp.setBorderPainted(false);
-                            tmp.setSelected(false);
-                            selected.remove(tmp);
+                    //Can submit right now
+                    if (setButton.getText() == "SUBMIT") {
+                        if (myUN.equals(userLocked)) {
+                            submitSet(myUN, selected);
+                            timer.stop();
                         }
-                    } else {
-                        if (setButton.getText() == "SET") {
-                            ClientInit.inStream.println("ACK_LOCK");
-                            setButton.setText("SUBMIT");
-                            TimerTask submit = new submitSETTimer();
-                            timer.schedule(submit, Game.LOCKTIME);     //3000 milliseconds = 3 seconds
+//                        reset();
+//                        clearButtons();
+//                        setButton.setText("SET");
+                    } else {//Clicked the Set button, send a Lock request
+                        if (setButton.getText() == "SET" && (userLocked == null || myUN.equals(userLocked))) {
+                            ClientInit.inStream.println("LOCK");
                         }
                     }
-                } else {
-                    setButton.setText("Locked");
-                    TimerTask submit = new submitSETTimer();
-                    timer.schedule(submit, 5000);     //3000 milliseconds = 3 seconds
                 }
             }
         });
     }
 
+    //Clears it and deletes it from the selected set
+    private void clearButtons() {
+        for (int i = 0; i < cards.size(); i++) {
+            Card tmp = cards.get(i);
+            tmp.setBorderPainted(false);
+            tmp.setSelected(false);
+            selected.remove(tmp);
+        }
+    }
+
     private void submitSet(String username, ArrayList<Card> selected){
         if (selected.size() != 3) {
-            disableSET();
+            this.disabled();
             return;
         }
         String s = "REPLACE";
@@ -377,27 +343,6 @@ public class GUIGame extends JPanel{
                 board.insert(tmp);
                 tmp.setVisible(true);
                 tmp.setPreferredSize(new Dimension(20, 20));
-//                tmp.addActionListener(new ActionListener() {
-//                    public void actionPerformed(ActionEvent e) {
-//                        Card c = (Card) e.getSource();
-//                        //Toggle the button
-//                        if (selected.contains(c)) {
-//                            //c.setEnabled(true);
-//                            c.setSelected(false);
-//                            c.setBorderPainted(false);
-//                            selected.remove(c);
-//                        } else if (selected.size() < 3) {
-//                            //c.setEnabled(false);
-//                            c.setBorderPainted(true);
-//                            c.setSelected(true);
-//                            selected.add(c);
-//                            System.out.println("YOU PRESSED THE BUTTON. " + c.toString());
-//                        }
-//                        if (lockedOut && selected.size() == 3) {
-//                            setButton.setText("SUBMIT");
-//                        }
-//                    }
-//                });
                 cardspace.add(tmp);
             }
         }
@@ -419,16 +364,23 @@ public class GUIGame extends JPanel{
         System.out.println("Game processing the response");
         if(tokens[0].equals("ACK_REPLACE")){
             selected.clear();
-            if(tokens[1].equals("SUCCESS")) {
+            System.out.println("TOK=" + tokens[2] + " NAME="+this.myUN);
+            if (tokens[1].equals("SUCCESS")) {
                 ArrayList<game.Card> newBoard = new ArrayList<>(12);
-                for (int i = 3; i < tokens.length-1;i++) {
-                    System.out.println(tokens[i]);
+                for (int i = 3; i < tokens.length - 1; i++) {
                     newBoard.add(new Card(tokens[i]));
                 }
                 this.updateCards(newBoard);
+                this.updateUserModel(tokens[2], 1);
             } else {
-                JOptionPane.showMessageDialog(this.gameboard, "Not a Set");
-                disableSET();
+                if (myUN.equals(tokens[2])) {
+                    JOptionPane.showMessageDialog(this.gameboard, "Not a Set");
+                    disabled();
+                } else {
+                    System.out.println("The other client is disabled");
+                    enableButton();
+                }
+                this.updateUserModel(tokens[2], -1);
             }
         } else if (tokens[0].equals("ACK_START")) {
             boolean seenCards = false;
@@ -443,6 +395,7 @@ public class GUIGame extends JPanel{
                     }
                     Object[] row = {tokens[i], new Integer(0)};
                     newScoreboard.add(row);
+
                 } else {
                     if (tokens[i].equals("GAME"))
                         break;
@@ -451,17 +404,102 @@ public class GUIGame extends JPanel{
             }
             Object tmp[][] = new Object[newScoreboard.size()][4];
             tmp = newScoreboard.toArray(tmp);
-//            updateScoreboard(tmp);
-            System.out.println(cards);
+            updateScoreboard(tmp);
+//            System.out.println(cards);
             this.updateCards(cards);
+        } else if (tokens[0].equals("LOCK")) {
+            if (userLocked == null) {
+                System.err.println("userLocked not null " + userLocked);
+            }
+            userLocked = tokens[1];
+            if (userLocked.equals(this.myUN) == false) {
+                System.out.println("LOCK client " + this.myUN);
+                this.locked(tokens[1]);
+            } else {
+                //Submit mode
+                this.setButton.setText("SUBMIT");
+                this.locked(tokens[1]);
+            }
         }
+    }
+
+    private void updateUserModel(String name, int dir) {
+        System.out.println("BEGIN UPDATE");
+        ArrayList<Object[]> newScoreboard = new ArrayList<>();
+
+        System.out.println("ROW="+userTable.getModel().getRowCount());
+        for (int i = 0; i < userTable.getModel().getRowCount(); i++) {
+            Object[] row = {userTable.getModel().getValueAt(i,0), new Integer(((Integer) userTable.getModel().getValueAt(i, 1)).intValue()+dir)};
+            System.out.println(row[0] + " " + row[1]);
+            newScoreboard.add(row);
+        }
+
+//
+//        Object tmp[][] = new Object[newScoreboard.size()][2];
+//        tmp = newScoreboard.toArray(tmp);
+//        userModel = new DefaultTableModel(tmp, this.userColumns);
+//        userTable.setModel(userModel);
+//        formatTable(userTable);
+//        updateScoreboard(tmp);
+
+//        userTable.repaint();
+//        userTable.revalidate();
+//        ((AbstractTableModel)userTable.getModel()).fireTableDataChanged();
+//        scoreboard.repaint();
+//        scoreboard.revalidate();
+    }
+
+    private void disabled() {
+        setButton.setEnabled(false);
+        setButton.setText("Disabled");
+        Timer t = new Timer(Game.LOCKTIME, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (userLocked == null) {
+                    enableButton();
+                }
+            }
+        });
+        t.setRepeats(false);
+        t.start();
+    }
+
+    private void enableButton() {
+        userLocked = null;
+        setButton.setEnabled(true);
+        setButton.setText("SET");
+    }
+
+    private void locked(String user) {
+        System.out.println(user + " is locked");
+        userLocked = user;
+        if (user.equals(this.myUN)) {
+            setButton.setText("SUBMIT");
+            timer = new Timer(Game.LOCKTIME, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    submitSet(myUN, selected);
+                }
+            });
+            timer.setRepeats(false);
+            timer.start();
+        } else {
+            this.setButton.setText("Locked by " + user);
+        }
+
     }
 
     //Gordon calls this
     public void updateScoreboard(Object [][] data) {
-        for(int i=0; i<data.length; i+=4) {
-            scoreboard.add(new JLabel(data[i+1]+" Score: "+data[i+2]));
-        }
+//        for(int i=0; i<data.length; i+=4) {
+//            scoreboard.add(new JLabel(data[i+1]+" Score: "+data[i+2]));
+//        }
+
+        DefaultTableModel gameModel = new DefaultTableModel(data, this.userColumns);
+//        setModel(gameModel);
+        userTable.setModel(gameModel);
+        formatTable(userTable);
+
         userData = data;
         createScoreboard();
         scoreboard.revalidate();
