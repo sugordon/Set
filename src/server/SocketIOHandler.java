@@ -151,11 +151,21 @@ public class SocketIOHandler{
                 } else if (s[0].equals("REPLACE")) {
                     lt.stop();
                     int success = g.replace(s[1], s[2], s[3], this._thread.getPlayer());
+                    System.out.println(success);
                     if (success == 0) {
                         output = "ACK_REPLACE,SUCCESS," + _thread.getPlayer()+",";
                         for (game.Card c : g.getBoard()) {
-                            output += c.toString() + ",";
+                            if (c != null) {
+                                output += c.toString() + ",";
+                            }
                         }
+                    } else if (success == 4) {
+                        output = "GAME_OVER,";
+                        for (Player p : _thread.getGame().getPlayers()) {
+                            output += p.getName() + ":" + p.getScore()+" ";
+                        }
+                        output += ",END";
+                        this.sendAll(output);
                     } else {
                         output = "ACK_REPLACE,FAILURE,"+this._thread.getPlayer()+",";
                         lt = new Timer(Game.LOCKTIME, new ActionListener() {

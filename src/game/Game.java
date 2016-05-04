@@ -120,12 +120,16 @@ public class Game {
 //		int[] three = {sThree.charAt(0), sThree.charAt(1)};
 //		if (playerNum != lock)
 //			return 2;
+
 		if (remove(one, two, three)) {
+			p.increment(1);
+			if (this.deck.size() == 0 && allSets.size() == 0) {
+				return 4;
+			}
 			deal(3);
 			while (allSets.size() == 0) {
 				deal(3);
 			}
-			p.increment(1);
 			lock = null;
 			lockTimer.stop();
 
@@ -181,7 +185,7 @@ public class Game {
 	public static ArrayList<Card> createDeck(ArrayList<Card> deck) {
 		int[] vals = {0, 0, 0, 0};
 		//Initialize the Deck
-		for (int i = 0; i < 81; i++) {
+		for (int i = 0; i < 12; i++) {
 			deck.add(new Card(vals[0], vals[1], vals[2], vals[3]));
 			int carry = 1;
 			for (int j = 0; j < 4; j++) {

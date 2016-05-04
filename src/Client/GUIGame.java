@@ -50,11 +50,9 @@ public class GUIGame extends JPanel{
     String[] userColumns = {"Name",
             "Score"};
 
-    Object[][] userData = {                                                     //swap for Player.getName, and Player.getScore
-            {"", new Integer(0)},
-    };
+    ArrayList<Object[]> userData = new ArrayList<>();
 
-    DefaultTableModel userModel = new DefaultTableModel(userData, userColumns);
+//    DefaultTableModel userModel = new DefaultTableModel(userData, userColumns);
 
     //Constructor
     public GUIGame(int rows, String uid) {
@@ -130,7 +128,7 @@ public class GUIGame extends JPanel{
         s.anchor = GridBagConstraints.CENTER;
         s.insets = new Insets(10, 10, 10, 10);
 
-        gameboard.add(userTable, s);
+        gameboard.add(scoreboard, s);
 
         b = new GridBagConstraints();
         b.gridx = 6;
@@ -154,34 +152,34 @@ public class GUIGame extends JPanel{
 
     public void createScoreboard(){
         //Scoreboard
-        userData = sortScoreboard(userData);
-        userModel = new DefaultTableModel(userData, userColumns);
-        userTable = new JTable(userModel) {
-            @Override //Disable editing
-            public boolean isCellEditable(int r, int c) {return false;}
-        };
-        formatTable(userTable);
-        JScrollPane scrollPane1 = new JScrollPane(userTable);
-        scrollPane1.setPreferredSize(new Dimension(200, 200));
-        JLabel usersLabel = new JLabel("Users Online");
-        usersLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        users.add(usersLabel);
-        users.add(scrollPane1);
-        //setAlignmentX(Component.CENTER_ALIGNMENT);
-        setMaximumSize(new Dimension(200, 10));
-        //add(users, BorderLayout.EAST);
+//        userData = sortScoreboard(userData);
+//        userModel = new DefaultTableModel(userData, userColumns);
+//        userTable = new JTable(userModel) {
+//            @Override //Disable editing
+//            public boolean isCellEditable(int r, int c) {return false;}
+//        };
+//        formatTable(userTable);
+//        JScrollPane scrollPane1 = new JScrollPane(userTable);
+//        scrollPane1.setPreferredSize(new Dimension(200, 200));
+//        JLabel usersLabel = new JLabel("Users Online");
+//        usersLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+//        users.add(usersLabel);
+//        users.add(scrollPane1);
+//        //setAlignmentX(Component.CENTER_ALIGNMENT);
+//        setMaximumSize(new Dimension(200, 10));
+//        //add(users, BorderLayout.EAST);
     }
 
     private Object [][] sortScoreboard(Object [][] Scoredata){
-        userData = Scoredata;
+//        userData = Scoredata;
+//
+//        java.util.Arrays.sort(userData, new java.util.Comparator<Object[]>() {
+//            public int compare(Object[] a, Object[] b) {
+//                return -Integer.compare((Integer) a[1], (Integer) b[1]);
+//            }
+//        });
 
-        java.util.Arrays.sort(userData, new java.util.Comparator<Object[]>() {
-            public int compare(Object[] a, Object[] b) {
-                return -Integer.compare((Integer) a[1], (Integer) b[1]);
-            }
-        });
-
-        return userData;
+        return null;
     }
 
     public void createBanner(){
@@ -353,12 +351,17 @@ public class GUIGame extends JPanel{
                     newBoard.add(new Card(tokens[i]));
                 }
                 this.updateCards(newBoard);
-                this.updateUserModel(tokens[2], 1);
+//                this.updateUserModel(tokens[2], 1);
                 if(tokens[2].equals(this.myUN))
                     enableButton();
                 else
                     disabled();
-
+                boolean found = false;
+                for (int i = 0; i < userData.size();i++) {
+                    if (userData.get(i)[0].equals(tokens[2])) {
+                        userData.get(i)[1] = new Integer(((Integer)userData.get(i)[1]).intValue()+1);
+                    }
+                }
             } else {
                 if (myUN.equals(tokens[2])) {
                     JOptionPane.showMessageDialog(this.gameboard, "Not a Set");
@@ -367,8 +370,13 @@ public class GUIGame extends JPanel{
                     System.out.println("The other client is disabled");
                     enableButton();
                 }
-                this.updateUserModel(tokens[2], -1);
+                for (int i = 0; i < userData.size();i++) {
+                    if (userData.get(i)[0].equals(tokens[2])) {
+                        userData.get(i)[1] = new Integer(((Integer)userData.get(i)[1]).intValue()-1);
+                    }
+                }
             }
+            this.updateScoreboard();
             userLocked = null;
         } else if (tokens[0].equals("ACK_START")) {
             clearButtons();
@@ -384,7 +392,7 @@ public class GUIGame extends JPanel{
                         continue;
                     }
                     Object[] row = {tokens[i], new Integer(0)};
-                    newScoreboard.add(row);
+                    userData.add(row);
 
                 } else {
                     if (tokens[i].equals("GAME"))
@@ -392,10 +400,22 @@ public class GUIGame extends JPanel{
                     cards.add(new Card(tokens[i]));
                 }
             }
-            Object tmp[][] = new Object[newScoreboard.size()][4];
-            tmp = newScoreboard.toArray(tmp);
-            updateScoreboard(tmp);
+//            Object tmp[][] = new Object[newScoreboard.size()][4];
+//            tmp = newScoreboard.toArray(tmp);
+            updateScoreboard();
 //            System.out.println(cards);
+            if (cards.size() <= 12) {
+                this.cols = 4;
+            }
+            if (cards.size() > 12) {
+                this.cols = 5;
+            }
+            if (cards.size() > 15) {
+                this.cols = 6;
+            }
+            if (cards.size() > 18) {
+                this.cols = 7;
+            }
             this.updateCards(cards);
         } else if (tokens[0].equals("LOCK")) {
             if (userLocked == null) {
@@ -417,6 +437,10 @@ public class GUIGame extends JPanel{
             clearButtons();
             selected.clear();
             enableButton();
+        }
+        else if (tokens[0].equals("GAME_OVER")) {
+            JOptionPane.showMessageDialog(this.gameboard, tokens[1]);
+            ClientInit.switchStates(ClientInit.GAME, ClientInit.LOBBY);
         }
     }
 
@@ -478,19 +502,31 @@ public class GUIGame extends JPanel{
     }
 
     //Gordon calls this
-    public void updateScoreboard(Object [][] data) {
+    public void updateScoreboard() {
+        System.out.println("UPDATE");
+        //Edit for modified Player class later
+        scoreboard.setLayout(new GridLayout(15,1));
+        scoreboard.removeAll();
+		for(int i = 0; i<userData.size(); i++){
+			JLabel tmp = new JLabel(userData.get(i)[0]+", "+userData.get(i)[1]+"\n");
+			tmp.setFont(new Font("Arial",1,18));
+            scoreboard.add(tmp);
+        }
+//        scoreboard.setMinimumSize(new Dimension(80, 160));
+//        scoreboard.setMaximumSize(new Dimension(80, 160));
+        scoreboard.repaint();
 //        for(int i=0; i<data.length; i+=4) {
 //            scoreboard.add(new JLabel(data[i+1]+" Score: "+data[i+2]));
 //        }
 
-        DefaultTableModel gameModel = new DefaultTableModel(data, this.userColumns);
-//        setModel(gameModel);
-        userTable.setModel(gameModel);
-        formatTable(userTable);
-
-        userData = data;
-        createScoreboard();
-        scoreboard.revalidate();
+//        DefaultTableModel gameModel = new DefaultTableModel(data, this.userColumns);
+////        setModel(gameModel);
+//        userTable.setModel(gameModel);
+//        formatTable(userTable);
+//
+//        userData = data;
+//        createScoreboard();
+//        scoreboard.revalidate();
     }
 
     private void formatTable(JTable t) {
