@@ -150,6 +150,7 @@ public class GUILobby extends JPanel{
             @Override
             public void windowClosing(WindowEvent e) {
                 //TODO: Add proper exit behavior (take back to login)
+                disconnect_from_server();
                 super.windowClosing(e);
             }
         });
@@ -344,8 +345,8 @@ public class GUILobby extends JPanel{
         JPanel names = new JPanel();
         names.add(new JLabel("Enter a name: "));
         names.add(nameField);
-        names.add(new JLabel("Enter a password: "));
-        names.add(passField);
+        //names.add(new JLabel("Enter a password: "));
+        //names.add(passField);
         temp.add(names);
         temp.add(Box.createVerticalGlue());
         JPanel buttons = new JPanel(new FlowLayout());

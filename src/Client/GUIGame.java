@@ -215,15 +215,19 @@ public class GUIGame extends JPanel{
         try {
             for (int i = 0; i < cards.size(); i++) {
                 Card tmp = cards.get(i);
-                String path = "./bin/" + tmp.toString() + ".gif";
-                File f = new File(path);
-                Image img = ImageIO.read(f);
+////                String path = "./src/" + tmp.toString() + ".gif";
+//                File f = new File(path);
+//                System.out.println(new File("").getPath());
+//                System.out.println(new File("").getAbsolutePath());
+//                Image img = ImageIO.read(f);
 //                System.out.println(path);
 //                ImageIcon img = new ImageIcon(getClass().getResource(path));
 //                ImageIcon img = new ImageIcon(getClass().getResource("images_cards/0000.gif"));
 //                tmp.setIcon(img);
-                tmp.setText(tmp.toString());
-//                tmp.setIcon(new ImageIcon(img));
+//                tmp.setText(tmp.toString());
+                ImageIcon card_img = new ImageIcon(getClass().getResource("/" + tmp.toString() + ".gif"));
+
+                tmp.setIcon(card_img);
                 tmp.setBorder(BorderFactory.createLineBorder(new Color(6, 138, 10), 10));
                 tmp.setBorderPainted(false);
                 tmp.setContentAreaFilled(false);
@@ -246,7 +250,7 @@ public class GUIGame extends JPanel{
                     }
                 });
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         //return cards;

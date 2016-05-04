@@ -44,7 +44,7 @@ public class ServerMultiThread extends Thread {
             out = "INIT_CONN";
             outStream.println(out);
             while ((in = inStream.readLine()) != null) {
-                if (in.equals("END_CONN")) {
+                if (in.contains("END_CONN")) {
                     System.out.println("Closing connection with user " +this.current_player);
                     this.close();
                     break;
@@ -58,6 +58,8 @@ public class ServerMultiThread extends Thread {
             this.close();
             e.printStackTrace();
         }
+
+        close();
     }
 
     private void close() {

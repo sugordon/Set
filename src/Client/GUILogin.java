@@ -49,10 +49,10 @@ public class GUILogin extends JPanel{
 
     private void buildLogin() {
         loginscreen = new JFrame("Welcome to SET!");
-        loginscreen.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        loginscreen.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         loginscreen.setLayout(null);
         loginscreen.getContentPane().setBackground(new Color(51, 255, 255));
-        loginscreen.setPreferredSize(new Dimension(1000, 700));
+        loginscreen.setPreferredSize(new Dimension(300, 150));
         //loginscreen.setResizable(false);
 
         JLabel userLabel = new JLabel("Username");
@@ -85,15 +85,16 @@ public class GUILogin extends JPanel{
 
             public void windowClosing(WindowEvent e) {
                 //TODO: Add proper exit behavior
-                ClientInit.inStream.println("END_CONN");
+                //ClientInit.inStream.println("END_CONN");
 
-                super.windowClosing(e);
 
                 try {
                     ClientInit.sck.close();
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 }
+                super.windowClosing(e);
+
             }
         });
 
