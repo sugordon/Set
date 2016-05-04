@@ -44,11 +44,11 @@ public class ServerMultiThread extends Thread {
             out = "INIT_CONN";
             outStream.println(out);
             while ((in = inStream.readLine()) != null) {
-                out = io.processInput(in);
                 if (out.equals("END_CONN")) {
                     this.close();
                     break;
                 }
+                out = io.processInput(in);
                 outStream.println(out);
             }
         }
