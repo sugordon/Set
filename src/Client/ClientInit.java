@@ -20,8 +20,8 @@ public class ClientInit {
 
     public static int STATE = 0;
 
-    private static String HOST = "sable06.ee.cooper.edu";
-    //private static String HOST = "localhost";
+    //private static String HOST = "sable06.ee.cooper.edu";
+    private static String HOST = "localhost";
 
     private static int PORT = 7100;
     public static Socket sck;

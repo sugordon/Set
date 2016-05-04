@@ -158,6 +158,13 @@ public class SocketIOHandler{
                         }
                     } else {
                         output = "ACK_REPLACE,FAILURE,"+this._thread.getPlayer()+",";
+                        lt = new Timer(Game.LOCKTIME, new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                System.out.println("User " +_thread.getPlayer()+"," + "is beind re enabled");
+                                _thread.outStream.println("ENABLE");
+                            }
+                        });
                     }
                     output += "GAME";
                     this.sendAll(output);
