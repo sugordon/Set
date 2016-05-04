@@ -127,6 +127,22 @@ public class GUILobby extends JPanel{
         lobby.add(this);
         setVisible(true);
         theOneTruePanel.setVisible(true);
+
+        this.lobby.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        this.lobby.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                //TODO: Add proper exit behavior
+                ClientInit.inStream.println("END_CONN");
+                super.windowClosing(e);
+
+                try {
+                    ClientInit.sck.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
     }
 
     private void addListeners(){
@@ -240,6 +256,7 @@ public class GUILobby extends JPanel{
             JOptionPane.showMessageDialog(null, "Null game name");
             return;
         }
+        System.out.println("creating game");
         ClientInit.inStream.println("CREATE,"+game_name+","+max_users+","+game_password);
         this.resetTheOneTruePanel();
         this.refreshGameButton.doClick();

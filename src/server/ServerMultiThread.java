@@ -42,19 +42,16 @@ public class ServerMultiThread extends Thread {
 
             String out, in;
             out = "INIT_CONN";
-            System.out.println("TEST2");
             outStream.println(out);
-            System.out.println("TEST0");
             while ((in = inStream.readLine()) != null) {
-                out = io.processInput(in);
-                if (out.equals("END_CONN")) {
+                if (in.equals("END_CONN")) {
+                    System.out.println("Closing connection with user " +this.current_player);
                     this.close();
                     break;
                 }
+                out = io.processInput(in);
                 outStream.println(out);
             }
-            System.out.println("TEST");
-
         }
         catch(IOException e){
             System.out.println("IO exception!");

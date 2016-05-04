@@ -24,6 +24,8 @@ public class SocketIOHandler{
     private int state;
     private ServerMultiThread _thread;
 
+    private Timer lt;
+
 
     public SocketIOHandler(ServerMultiThread thread){
         _thread = thread;
@@ -31,6 +33,8 @@ public class SocketIOHandler{
     }
 
     public String processInput(String input){
+        System.out.println("Received message:" + input +" from user " + _thread.getPlayer());
+
         String [] s = splitString(input);
         String output = "";
         switch (state){
@@ -41,11 +45,16 @@ public class SocketIOHandler{
             case LOGIN:
                 if(s[0].equals("LOGIN")){
                     if(Database.auth(s[1],s[2])) {
-                        output = "ACK_LOGIN,SUCCESS,LOBBY";
-                        state = LOBBY;
-                        _thread.setPlayer(s[1]);
+                        if(ServerInit.allThreads.containsKey(s[1])){
+                            output = "ACK_LOGIN,FAILURE,LOGIN";
+                        }
+                        else {
+                            output = "ACK_LOGIN,SUCCESS,LOBBY";
+                            state = LOBBY;
+                            _thread.setPlayer(s[1]);
 //                        System.out.println("SET PLAYER TO "+s[1]);
-                        ServerInit.allThreads.put(s[1], _thread);
+                            ServerInit.allThreads.put(s[1], _thread);
+                        }
                     }
                     else {
                         output = "ACK_LOGIN,FAILURE,LOGIN";
@@ -104,10 +113,15 @@ public class SocketIOHandler{
 //                    System.out.println("RECIEVED JOIN to " + s[1]);
                     Game g = ServerInit.gameRooms.get(s[1]);
 //                    System.out.println("GET PLAYER TO "+_thread.getPlayer());
-                    g.addPlayer(_thread.getPlayer(), _thread);
-                    _thread.setGame(g);
-                    output = "ACK_JOIN,SUCCESS,GAME";
-                    state = GAME;
+                    if(g.getMaxPlayers() > g.getPlayers().size()) {
+                        g.addPlayer(_thread.getPlayer(), _thread);
+                        _thread.setGame(g);
+                        output = "ACK_JOIN,SUCCESS,GAME";
+                        state = GAME;
+                    }
+                    else{
+                        output = "ACK_JOIN,FAILURE,LOBBY";
+                    }
                 }
                 break;
             case ROOM:
@@ -125,7 +139,9 @@ public class SocketIOHandler{
                     output += "CARDS,";
 //                    System.out.println(g.getBoard());
                     for (game.Card c : g.getBoard()) {
-                        output += c.toString() + ",";
+                        if (c != null) {
+                            output += c.toString() + ",";
+                        }
                     }
                     output += "GAME";
                 } else if (s[0].equals("UPDATE")) {
@@ -133,10 +149,10 @@ public class SocketIOHandler{
                 } else if (s[0].equals("LOCK")) {
                     g.lock(_thread.getPlayer());
                     output = "LOCK,"+_thread.getPlayer()+",GAME";
-                    Timer lt = new Timer(Game.LOCKTIME, new ActionListener() {
+                    lt = new Timer(Game.LOCKTIME, new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
-                            System.out.println("SENDFAILURE");
+                            System.out.println("User " +_thread.getPlayer() +" timed out.  Sending failure");
                             sendAll("ACK_REPLACE,FAILURE,"+_thread.getPlayer()+","+",GAME");
                             g.lock(null);
                         }
@@ -145,14 +161,32 @@ public class SocketIOHandler{
                     lt.start();
                     this.sendAll(output);
                 } else if (s[0].equals("REPLACE")) {
+                    lt.stop();
                     int success = g.replace(s[1], s[2], s[3], this._thread.getPlayer());
+                    System.out.println(success);
                     if (success == 0) {
                         output = "ACK_REPLACE,SUCCESS," + _thread.getPlayer()+",";
                         for (game.Card c : g.getBoard()) {
-                            output += c.toString() + ",";
+                            if (c != null) {
+                                output += c.toString() + ",";
+                            }
                         }
+                    } else if (success == 4) {
+                        output = "GAME_OVER,";
+                        for (Player p : _thread.getGame().getPlayers()) {
+                            output += p.getName() + ":" + p.getScore()+" ";
+                        }
+                        output += ",END";
+                        this.sendAll(output);
                     } else {
                         output = "ACK_REPLACE,FAILURE,"+this._thread.getPlayer()+",";
+                        lt = new Timer(Game.LOCKTIME, new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                System.out.println("User " +_thread.getPlayer()+"," + "is beind re enabled");
+                                _thread.outStream.println("ENABLE");
+                            }
+                        });
                     }
                     output += "GAME";
                     this.sendAll(output);
@@ -166,10 +200,12 @@ public class SocketIOHandler{
         if (output.isEmpty()) {
             output = "BAD_VALUE,"+input+","+state;    //invalid data received from
         }
+        System.out.println("responding to user " + _thread.getPlayer() + " with message: " + output);
         return output;
     }
 
     private void sendAll(String output) {
+        System.out.println("sending to all other users " + output);
         for (ServerMultiThread th : _thread.getGame().threads) {
             if (th != _thread) {
                 th.outStream.println(output);

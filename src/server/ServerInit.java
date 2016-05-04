@@ -56,6 +56,7 @@ public class ServerInit{
     }
 
     public static void main(String[] args){
+        System.out.println("Starting server on port 7100");
         ServerInit server = new ServerInit();
         System.exit(0);
     }

@@ -82,9 +82,18 @@ public class GUILogin extends JPanel{
 
         loginscreen.addWindowListener(new WindowAdapter() {
             @Override
+
             public void windowClosing(WindowEvent e) {
                 //TODO: Add proper exit behavior
+                ClientInit.inStream.println("END_CONN");
+
                 super.windowClosing(e);
+
+                try {
+                    ClientInit.sck.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
             }
         });
 

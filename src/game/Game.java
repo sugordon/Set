@@ -45,7 +45,8 @@ public class Game {
 		this.pwd = pwd;
 
 		deck = Game.createDeck(deck);
-		Collections.shuffle(deck, new Random(1223));
+//		Collections.shuffle(deck, new Random(1223));
+		Collections.shuffle(deck);
 		deal(12);
 		while (allSets.size() == 0) {
 			deal(3);
@@ -69,9 +70,9 @@ public class Game {
 
 	private Card[] deal(int cards){
         Card[] retVal = new Card[cards];
+        if (deck.size() == 0 || (board.size() >= 12 && allSets.size() != 0))
+            return null;
 		for (; cards != 0; cards--) {
-			if (deck.size() == 0 || (board.size() > 12 && allSets.size() == 0))
-				return null;
 			Card newCard = deck.remove(deck.size()-1);
             retVal[cards-1] = newCard;
 			board.insert(newCard);
@@ -120,12 +121,16 @@ public class Game {
 //		int[] three = {sThree.charAt(0), sThree.charAt(1)};
 //		if (playerNum != lock)
 //			return 2;
+
 		if (remove(one, two, three)) {
+			p.increment(1);
+			if (this.deck.size() == 0 && allSets.size() == 0) {
+				return 4;
+			}
 			deal(3);
 			while (allSets.size() == 0) {
 				deal(3);
 			}
-			p.increment(1);
 			lock = null;
 			lockTimer.stop();
 
@@ -155,14 +160,14 @@ public class Game {
 
     public boolean removePlayer(String player) {
         Player a = null;
-        for (Player p : this.getPlayers()) {
+        for (Player p : players) {
             if (p.getName().equals(player)) {
-                a = p;
+				a = p;
+               players.remove(p);
             }
         }
         if (a == null)
             return false;
-        this.getPlayers().remove(a);
         return true;
     }
 
