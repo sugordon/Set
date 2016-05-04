@@ -258,7 +258,7 @@ public class GUILobby extends JPanel{
             return;
         }
         System.out.println("creating game");
-        ClientInit.inStream.println("CREATE,"+game_name+","+max_users+","+game_password);
+        ClientInit.inStream.println("CREATE,"+game_name+","+max_users+","+"NOPASS");
         this.resetTheOneTruePanel();
         this.refreshGameButton.doClick();
     }

@@ -144,6 +144,7 @@ public class SocketIOHandler{
                         }
                     }
                     output += "GAME";
+                    this.sendAll(output);
                 } else if (s[0].equals("UPDATE")) {
                     output = "ACK_UPDATE,UPDATE,GAME";
                 } else if (s[0].equals("LOCK")) {

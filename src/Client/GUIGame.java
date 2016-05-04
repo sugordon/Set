@@ -183,7 +183,8 @@ public class GUIGame extends JPanel{
     }
 
     public void createBanner(){
-        ImageIcon icon = new ImageIcon("./bin/GameBanner.jpg");
+        ImageIcon icon = new ImageIcon(getClass().getResource("/GameBanner.jpg"));
+        //ImageIcon icon = new ImageIcon("./bin/GameBanner.jpg");
         thumb = new JLabel();
         thumb.setIcon(icon);
     }
@@ -389,7 +390,7 @@ public class GUIGame extends JPanel{
             boolean seenCards = false;
             ArrayList<Object[]> newScoreboard = new ArrayList<>();
             ArrayList<Card> cards = new ArrayList<>(12);
-
+            userData.clear();
             for (int i = 3; i < tokens.length; i++) {
                 if (seenCards == false) {
                     if (tokens[i].equals("CARDS")) {
@@ -397,8 +398,13 @@ public class GUIGame extends JPanel{
                         continue;
                     }
                     Object[] row = {tokens[i], new Integer(0)};
+//                    for (Object[] o : userData) {
+//                        System.out.println(o[0].toString());
+//                        if (tokens[i].equals(o[0])) {
+//                            continue;
+//                        }
+//                    }
                     userData.add(row);
-
                 } else {
                     if (tokens[i].equals("GAME"))
                         break;
@@ -516,6 +522,7 @@ public class GUIGame extends JPanel{
 		for(int i = 0; i<userData.size(); i++){
 			JLabel tmp = new JLabel(userData.get(i)[0]+": "+userData.get(i)[1]+"\n");
 			tmp.setFont(new Font("Arial",1,18));
+            scoreboard.add(tmp);
             scoreboard.add(tmp);
         }
 //        scoreboard.setMinimumSize(new Dimension(80, 160));

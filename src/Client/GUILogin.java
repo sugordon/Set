@@ -103,7 +103,10 @@ public class GUILogin extends JPanel{
     }
 
     public String getUN(){
-        return userText.getText();
+        String regex = "^[a-zA-Z]+$";
+        if (userText.getText().matches(regex))
+            return userText.getText();
+        else return null;
     }
 
     public String getPass(){
@@ -114,7 +117,9 @@ public class GUILogin extends JPanel{
             return null;
         }
         */
-        return passwordText.getText();
+        if (passwordText.getText().isEmpty())
+            return null;
+        else return passwordText.getText();
     }
 
     public void addLoginAndRegisterListeners() {
@@ -123,7 +128,9 @@ public class GUILogin extends JPanel{
             public void actionPerformed(ActionEvent e) {
                 String username = getUN();
                 String password = getPass();
-                ClientInit.inStream.println("LOGIN," + username + "," + Database.hash(password));
+                if(username == null || password == null)
+                    JOptionPane.showMessageDialog(null, "Please enter a valid username and password.  Only Alphanumeric characters are allowed.");
+                else ClientInit.inStream.println("LOGIN," + username + "," + Database.hash(password));
                 //processResponse(e);
 
             }
@@ -133,7 +140,9 @@ public class GUILogin extends JPanel{
             public void actionPerformed(ActionEvent e) {
                 String username = getUN();
                 String password = getPass();
-                ClientInit.inStream.println("REGISTER," + username + "," + Database.hash(password));
+                if(username == null || password == null)
+                    JOptionPane.showMessageDialog(null, "Please enter a valid username and password.  Only Alphanumeric characters are allowed.");
+                else ClientInit.inStream.println("REGISTER," + username + "," + Database.hash(password));
                 //processResponse(e);
             }
         });
