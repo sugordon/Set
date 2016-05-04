@@ -127,6 +127,21 @@ public class GUILobby extends JPanel{
         lobby.add(this);
         setVisible(true);
         theOneTruePanel.setVisible(true);
+
+        this.lobby.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        this.lobby.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                //TODO: Add proper exit behavior
+                super.windowClosing(e);
+
+                try {
+                    ClientInit.sck.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
     }
 
     private void addListeners(){

@@ -10,6 +10,8 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,7 +27,6 @@ public class GUIGame extends JPanel{
     public game.Board board;
 
     public JFrame gameboard = new JFrame("SET");
-
     private JTable userTable;
 
     public JLabel thumb;
@@ -87,6 +88,21 @@ public class GUIGame extends JPanel{
 
         gameboard.setVisible(true);
         gameboard.setTitle(this.myUN);
+
+        this.gameboard.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        this.gameboard.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                //TODO: Add proper exit behavior
+                super.windowClosing(e);
+
+                try {
+                    ClientInit.sck.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
     }
 
     public void layoutGame(){
@@ -322,7 +338,11 @@ public class GUIGame extends JPanel{
         String [] tokens = msg.split(",");
         System.out.println("MSG="+msg);
         System.out.println("Game processing the response");
+
+
         if(tokens[0].equals("ACK_REPLACE")){
+            clearButtons();
+            selected.clear();
             userLocked = null;
             System.out.println("TOK=" + tokens[2] + " NAME="+this.myUN);
             if (tokens[1].equals("SUCCESS")) {
@@ -349,6 +369,8 @@ public class GUIGame extends JPanel{
             }
             userLocked = null;
         } else if (tokens[0].equals("ACK_START")) {
+            clearButtons();
+            selected.clear();
             boolean seenCards = false;
             ArrayList<Object[]> newScoreboard = new ArrayList<>();
             ArrayList<Card> cards = new ArrayList<>(12);
@@ -379,6 +401,8 @@ public class GUIGame extends JPanel{
             }
             userLocked = tokens[1];
             if (userLocked.equals(this.myUN) == false) {
+                clearButtons();
+                selected.clear();
                 System.out.println("LOCK client " + this.myUN);
                 this.locked(tokens[1]);
             } else {
@@ -388,6 +412,8 @@ public class GUIGame extends JPanel{
             }
         }
         else if (tokens[0].equals("ENABLE")){
+            clearButtons();
+            selected.clear();
             enableButton();
         }
     }
@@ -473,9 +499,13 @@ public class GUIGame extends JPanel{
     }
 
 
-    public static void main(String [] args){
-        GUIGame game = new GUIGame(4,"LOL");
-        game.createAndShowBoard();
+    private void disconnect_from_server(){
+        try {
+            ClientInit.sck.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //After you log out, takes you back to login screen
     }
 
 }

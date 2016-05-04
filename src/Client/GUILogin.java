@@ -85,6 +85,12 @@ public class GUILogin extends JPanel{
             public void windowClosing(WindowEvent e) {
                 //TODO: Add proper exit behavior
                 super.windowClosing(e);
+
+                try {
+                    ClientInit.sck.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
             }
         });
 
