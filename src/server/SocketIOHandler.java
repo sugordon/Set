@@ -139,7 +139,9 @@ public class SocketIOHandler{
                     output += "CARDS,";
 //                    System.out.println(g.getBoard());
                     for (game.Card c : g.getBoard()) {
-                        output += c.toString() + ",";
+                        if (c != null) {
+                            output += c.toString() + ",";
+                        }
                     }
                     output += "GAME";
                 } else if (s[0].equals("UPDATE")) {

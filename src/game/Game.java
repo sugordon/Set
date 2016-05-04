@@ -45,7 +45,8 @@ public class Game {
 		this.pwd = pwd;
 
 		deck = Game.createDeck(deck);
-		Collections.shuffle(deck, new Random(1223));
+//		Collections.shuffle(deck, new Random(1223));
+		Collections.shuffle(deck);
 		deal(12);
 		while (allSets.size() == 0) {
 			deal(3);
@@ -69,9 +70,9 @@ public class Game {
 
 	private Card[] deal(int cards){
         Card[] retVal = new Card[cards];
+        if (deck.size() == 0 || (board.size() >= 12 && allSets.size() != 0))
+            return null;
 		for (; cards != 0; cards--) {
-			if (deck.size() == 0 || (board.size() > 12 && allSets.size() == 0))
-				return null;
 			Card newCard = deck.remove(deck.size()-1);
             retVal[cards-1] = newCard;
 			board.insert(newCard);
@@ -185,7 +186,7 @@ public class Game {
 	public static ArrayList<Card> createDeck(ArrayList<Card> deck) {
 		int[] vals = {0, 0, 0, 0};
 		//Initialize the Deck
-		for (int i = 0; i < 12; i++) {
+		for (int i = 0; i < 81; i++) {
 			deck.add(new Card(vals[0], vals[1], vals[2], vals[3]));
 			int carry = 1;
 			for (int j = 0; j < 4; j++) {

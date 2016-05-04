@@ -207,7 +207,7 @@ public class GUIGame extends JPanel{
         }
 
 
-        cardspace.setLayout(new GridLayout(4,3));
+        cardspace.setLayout(new GridLayout(3,4));
         cardspace.setVisible(true);
     }
 
@@ -223,7 +223,7 @@ public class GUIGame extends JPanel{
 //                ImageIcon img = new ImageIcon(getClass().getResource("images_cards/0000.gif"));
 //                tmp.setIcon(img);
                 tmp.setText(tmp.toString());
-                tmp.setIcon(new ImageIcon(img));
+//                tmp.setIcon(new ImageIcon(img));
                 tmp.setBorder(BorderFactory.createLineBorder(new Color(6, 138, 10), 10));
                 tmp.setBorderPainted(false);
                 tmp.setContentAreaFilled(false);
@@ -326,6 +326,7 @@ public class GUIGame extends JPanel{
             System.out.printf("newCards is null");
         cardspace.revalidate();
         cardspace.repaint();
+        this.gameboard.repaint();
     }
 
     //If there isn't a valid set, the size of the board grid has to increase
@@ -403,7 +404,7 @@ public class GUIGame extends JPanel{
 //            Object tmp[][] = new Object[newScoreboard.size()][4];
 //            tmp = newScoreboard.toArray(tmp);
             updateScoreboard();
-//            System.out.println(cards);
+            System.out.println(cards.size());
             if (cards.size() <= 12) {
                 this.cols = 4;
             }
@@ -416,6 +417,7 @@ public class GUIGame extends JPanel{
             if (cards.size() > 18) {
                 this.cols = 7;
             }
+            cardspace.setLayout(new GridLayout(3, this.cols));
             this.updateCards(cards);
         } else if (tokens[0].equals("LOCK")) {
             if (userLocked == null) {
@@ -508,13 +510,16 @@ public class GUIGame extends JPanel{
         scoreboard.setLayout(new GridLayout(15,1));
         scoreboard.removeAll();
 		for(int i = 0; i<userData.size(); i++){
-			JLabel tmp = new JLabel(userData.get(i)[0]+", "+userData.get(i)[1]+"\n");
+			JLabel tmp = new JLabel(userData.get(i)[0]+": "+userData.get(i)[1]+"\n");
 			tmp.setFont(new Font("Arial",1,18));
             scoreboard.add(tmp);
         }
 //        scoreboard.setMinimumSize(new Dimension(80, 160));
 //        scoreboard.setMaximumSize(new Dimension(80, 160));
+        scoreboard.revalidate();
         scoreboard.repaint();
+        this.gameboard.revalidate();
+        this.gameboard.repaint();
 //        for(int i=0; i<data.length; i+=4) {
 //            scoreboard.add(new JLabel(data[i+1]+" Score: "+data[i+2]));
 //        }
