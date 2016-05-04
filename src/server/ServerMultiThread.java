@@ -42,9 +42,7 @@ public class ServerMultiThread extends Thread {
 
             String out, in;
             out = "INIT_CONN";
-            System.out.println("TEST2");
             outStream.println(out);
-            System.out.println("TEST0");
             while ((in = inStream.readLine()) != null) {
                 out = io.processInput(in);
                 if (out.equals("END_CONN")) {
@@ -53,8 +51,6 @@ public class ServerMultiThread extends Thread {
                 }
                 outStream.println(out);
             }
-            System.out.println("TEST");
-
         }
         catch(IOException e){
             System.out.println("IO exception!");

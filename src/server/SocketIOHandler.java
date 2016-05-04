@@ -24,6 +24,8 @@ public class SocketIOHandler{
     private int state;
     private ServerMultiThread _thread;
 
+    private Timer lt;
+
 
     public SocketIOHandler(ServerMultiThread thread){
         _thread = thread;
@@ -31,6 +33,8 @@ public class SocketIOHandler{
     }
 
     public String processInput(String input){
+        System.out.println("Received message:" + input +" from user " + _thread.getPlayer());
+
         String [] s = splitString(input);
         String output = "";
         switch (state){
@@ -133,10 +137,10 @@ public class SocketIOHandler{
                 } else if (s[0].equals("LOCK")) {
                     g.lock(_thread.getPlayer());
                     output = "LOCK,"+_thread.getPlayer()+",GAME";
-                    Timer lt = new Timer(Game.LOCKTIME, new ActionListener() {
+                    lt = new Timer(Game.LOCKTIME, new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
-                            System.out.println("SENDFAILURE");
+                            System.out.println("User " +_thread.getPlayer() +" timed out.  Sending failure");
                             sendAll("ACK_REPLACE,FAILURE,"+_thread.getPlayer()+","+",GAME");
                             g.lock(null);
                         }
@@ -145,6 +149,7 @@ public class SocketIOHandler{
                     lt.start();
                     this.sendAll(output);
                 } else if (s[0].equals("REPLACE")) {
+                    lt.stop();
                     int success = g.replace(s[1], s[2], s[3], this._thread.getPlayer());
                     if (success == 0) {
                         output = "ACK_REPLACE,SUCCESS," + _thread.getPlayer()+",";
@@ -166,10 +171,12 @@ public class SocketIOHandler{
         if (output.isEmpty()) {
             output = "BAD_VALUE,"+input+","+state;    //invalid data received from
         }
+        System.out.println("responding to user " + _thread.getPlayer() + " with message: " + output);
         return output;
     }
 
     private void sendAll(String output) {
+        System.out.println("sending to all other users " + output);
         for (ServerMultiThread th : _thread.getGame().threads) {
             if (th != _thread) {
                 th.outStream.println(output);
