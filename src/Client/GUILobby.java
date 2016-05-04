@@ -141,7 +141,6 @@ public class GUILobby extends JPanel{
         ListSelectionListener lsl = new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                System.out.println("ASDF");
                 if(e.getValueIsAdjusting()) return;
                 ListSelectionModel lsm = (ListSelectionModel) e.getSource();
                 if(!lsm.isSelectionEmpty()) {
@@ -193,12 +192,6 @@ public class GUILobby extends JPanel{
                 System.out.println("SENDING JOIN");
                 String gamename= (String) gameTable.getModel().getValueAt(selectedRow, 0);
                 ClientInit.inStream.println("JOIN,"+gamename);
-                try {
-                    System.out.println(ClientInit.outStream.readLine());
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                }
-                ClientInit.switchStates(ClientInit.LOBBY, ClientInit.GAME);
             }
         });
 
@@ -208,7 +201,6 @@ public class GUILobby extends JPanel{
     }
 
     private void update_game_list(ArrayList<Object[]> gameData){
-        System.out.println("HIHI");
         ClientInit.inStream.println("GAMES");
         System.out.println("SENT");
 //        String s = null;
@@ -249,6 +241,8 @@ public class GUILobby extends JPanel{
             return;
         }
         ClientInit.inStream.println("CREATE,"+game_name+","+max_users+","+game_password);
+        this.resetTheOneTruePanel();
+        this.refreshGameButton.doClick();
     }
 
     public void processResponse(String msg){
@@ -257,7 +251,7 @@ public class GUILobby extends JPanel{
         System.out.println("Lobby processing the response");
         if(tokens[0].equals("ACK_CREATE")){
             if(tokens[1].equals("SUCCESS"))
-                System.out.println(msg);
+                System.out.println("SUCCESS="+msg);
             else
                 JOptionPane.showMessageDialog(null,"Error creating game!");
         }
@@ -273,6 +267,11 @@ public class GUILobby extends JPanel{
             gameModel = new DefaultTableModel(tmp, gameColumnLabels);
             gameTable.setModel(gameModel);
             formatTable(gameTable);
+        }
+        else if (tokens[0].equals("ACK_JOIN")) {
+            if (tokens[1].equals("SUCCESS")) {
+                ClientInit.switchStates(ClientInit.LOBBY, ClientInit.GAME);
+            }
         }
 
     }
@@ -299,7 +298,6 @@ public class GUILobby extends JPanel{
         theOneTruePanel.revalidate();
         theOneTruePanel.repaint();
         addListeners();
-
     }
 
     //Game panel

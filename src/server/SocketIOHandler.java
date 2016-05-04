@@ -2,6 +2,7 @@ package server;
 
 import java.net.*;
 import java.io.*;
+import java.util.ArrayList;
 
 import game.Game;
 import game.Player;
@@ -39,7 +40,7 @@ public class SocketIOHandler{
                         output = "ACK_LOGIN,SUCCESS,LOBBY";
                         state = LOBBY;
                         _thread.setPlayer(s[1]);
-                        System.out.println("SET PLAYER TO "+s[1]);
+//                        System.out.println("SET PLAYER TO "+s[1]);
                         ServerInit.allThreads.put(s[1], _thread);
                     }
                     else {
@@ -82,7 +83,6 @@ public class SocketIOHandler{
                     if (_thread.getGame() == null) {
                         int num = Integer.parseInt(s[2]);
                         Game g = new Game(s[1], _thread.getPlayer(), num, s[3]);
-                        _thread.setGame(g);
                         ServerInit.gameRooms.put(s[1], g);
                         output = "ACK_CREATE,SUCCESS," + s[1] + ",ROOM";
                         //state = ROOM;
@@ -97,12 +97,13 @@ public class SocketIOHandler{
                     //s[3] contains password (optional)
                 } else
                 if (s[0].equals("JOIN")) {
-                    System.out.println("RECIEVED JOIN to " + s[1]);
-                    ServerInit.gameRooms.get(s[1]);
-                    Game g = _thread.getGame();
-                    System.out.println("GET PLAYER TO "+_thread.getPlayer());
-                    g.addPlayer(_thread.getPlayer());
-                    output = "ACK_JOIN,SUCCESS";
+//                    System.out.println("RECIEVED JOIN to " + s[1]);
+                    Game g = ServerInit.gameRooms.get(s[1]);
+//                    System.out.println("GET PLAYER TO "+_thread.getPlayer());
+                    g.addPlayer(_thread.getPlayer(), _thread);
+                    _thread.setGame(g);
+                    output = "ACK_JOIN,SUCCESS,GAME";
+                    state = GAME;
                 }
                 break;
             case ROOM:
@@ -112,20 +113,34 @@ public class SocketIOHandler{
             case GAME:
                 Game g = _thread.getGame();
                 if (s[0].equals("GAME_START")) {
-                    output = "ACK_START,"+g.getGameName()+","+g.getPlayers()+","+g.getBoard()+",GAME";
-                }
-                if (s[0].equals("UPDATE")) {
+
+                    output = "ACK_START," + g.getGameName() + ",PLAYERS,";
+                    for (Player p : g.getPlayers()) {
+                        output += p.getName() + ",";
+                    }
+                    output += "CARDS,";
+//                    System.out.println(g.getBoard());
+                    for (game.Card c : g.getBoard()) {
+                        output += c.toString() + ",";
+                    }
+                    output += "GAME";
+                } else if (s[0].equals("UPDATE")) {
                     output = "ACK_UPDATE,UPDATE,GAME";
-                }
-                //s[1] contains the player number of the lock
-                if (s[0].equals("LOCK")) {
-                    g.lock(Integer.parseInt(s[1]));
-                    output = "ACK_LOCK,"+g.getLock()+",GAME";
-                }
-                //s[1], s[2], s[3] contains the three cards, s[4] contains the player number
-                if (s[0].equals("REPLACE")) {
-                    boolean success = g.replace(s[1], s[2], s[3], Integer.parseInt(s[4]));
-                    output = "ACK_REPLACE,"+success+","+g.getBoard()+",GAME";
+                } else if (s[0].equals("LOCK")) {
+                    g.lock(_thread.getPlayer());
+                    output = "ACK_LOCK,"+_thread.getPlayer()+",GAME";
+                    this.sendAll(g.threads, output);
+                } else if (s[0].equals("REPLACE")) {
+                    int success = g.replace(s[1], s[2], s[3], this._thread.getPlayer());
+                    if (success == 0) {
+                        output = "ACK_REPLACE,SUCCESS," + _thread.getPlayer()+",";
+                        for (game.Card c : g.getBoard()) {
+                            output += c.toString() + ",";
+                        }
+                    } else {
+                        output += "FAILURE,"+this._thread.getPlayer()+","+success+",";
+                    }
+                    output += "GAME";
                 }
                 break;
 
@@ -137,6 +152,14 @@ public class SocketIOHandler{
             output = "BAD_VALUE,"+state;    //invalid data received from
         }
         return output;
+    }
+
+    private void sendAll(ArrayList<ServerMultiThread> threads, String output) {
+        for (ServerMultiThread th : threads) {
+            if (th != _thread) {
+                th.outStream.println(output);
+            }
+        }
     }
 
     public int getState(){

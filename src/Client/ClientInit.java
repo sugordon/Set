@@ -22,6 +22,7 @@ public class ClientInit {
 
     //private static String HOST = "sable06.ee.cooper.edu";
     private static String HOST = "localhost";
+
     private static int PORT = 7100;
     public static Socket sck;
 
@@ -113,6 +114,7 @@ public class ClientInit {
                 game.setVisible(true);
                 break;
             case GAME:
+                System.out.println("SWITCH TO GAME");
                 game.createAndShowBoard();
                 game.setVisible(true);
         }
@@ -123,12 +125,15 @@ public class ClientInit {
                 break;
             case LOBBY:
                 lobby.setVisible(false);
+                lobby.lobby.dispose();
                 break;
             case ROOM:
                 game.setVisible(false);
                 break;
             case GAME:
                 game.setVisible(false);
+                game.requestFocus();
+//                game.gameboard.dispose();
                 break;
         }
 
@@ -155,6 +160,8 @@ public class ClientInit {
             }
             else if (STATE == LOBBY)
                 lobby.processResponse(msg);
+            else if (STATE == GAME)
+                game.processResponse(msg);
             else if (STATE == ROOM);
 
         }

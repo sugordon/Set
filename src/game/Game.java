@@ -4,6 +4,7 @@
 package game;
 
 import network.Database;
+import server.ServerMultiThread;
 
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
@@ -24,9 +25,12 @@ public class Game {
 	private ArrayList<Card> deck = new ArrayList<Card>(81);
 	private Board board = new Board();
 	private ArrayList<Player> players = new ArrayList<Player>();
-	private int lock = -1;
-	private HashSet<CardSet> allSets = new HashSet<CardSet>();
+	private String lock = null;
+	public HashSet<CardSet> allSets = new HashSet<CardSet>();
 	private Timer lockTimer;
+    public ArrayList<ServerMultiThread> threads = new ArrayList<>();
+
+    public static final int LOCKTIME = 5000;
 
 	private final String gameName;
 	private final String owner;
@@ -41,32 +45,35 @@ public class Game {
 		this.pwd = pwd;
 
 		deck = Game.createDeck(deck);
-		Collections.shuffle(deck);
+		Collections.shuffle(deck, new Random(1223));
 		deal(12);
 		while (allSets.size() == 0) {
 			deal(3);
 		}
-		for (CardSet s : allSets) {
+        System.out.println("SETS");
+        for (CardSet s : allSets) {
 			System.out.println(s.toString());
 		}
 
-		lockTimer = new Timer(3000, new ActionListener() {
+		lockTimer = new Timer(Game.LOCKTIME, new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				players.get(lock).increment(-1);
-				lock = -1;
+//				players.get(lock).increment(-1);
+				lock = null;
 				System.out.println("Lock Reset");
 			}
 		});
 		lockTimer.setRepeats(false);
 	}
 
-	private boolean deal(int cards){
+	private Card[] deal(int cards){
+        Card[] retVal = new Card[cards];
 		for (; cards != 0; cards--) {
 			if (deck.size() == 0 || (board.size() > 12 && allSets.size() == 0))
-				return false;
+				return null;
 			Card newCard = deck.remove(deck.size()-1);
+            retVal[cards-1] = newCard;
 			board.insert(newCard);
 			for (Card card1 : board) {
 				for (Card card2 : board) {
@@ -80,11 +87,11 @@ public class Game {
 				}
 			}
 		}
-		return true;
+		return retVal;
 	}
 
-	public boolean lock(int playerNum) {
-		if (lock != -1) {
+	public boolean lock(String playerNum) {
+		if (lock != null) {
 			return false;
 		}
 		System.out.println("lock");
@@ -94,24 +101,43 @@ public class Game {
 		return true;
 	}
 
-	public boolean replace(String sOne, String sTwo, String sThree, int playerNum) {
-		int[] one = {sOne.charAt(0), sOne.charAt(1)};
-		int[] two = {sTwo.charAt(0), sTwo.charAt(1)};
-		int[] three = {sThree.charAt(0), sThree.charAt(1)};
-		if (playerNum != lock)
-			return false;
+	public int replace(String sOne, String sTwo, String sThree, String name) {
+		Player p = null;
+		for (Player a : this.getPlayers()) {
+			if (a.getName().equals(name)) {
+				p = a;
+				break;
+			}
+		}
+        int playerNum = this.getPlayers().indexOf(p);
+        int[] one = this.board.find(new Card(sOne));
+        int[] two = this.board.find(new Card(sTwo));
+        int[] three = this.board.find(new Card(sThree));
+        if (one == null || two == null || three == null)
+            return 3;
+//		int[] one = {sOne.charAt(0), sOne.charAt(1)};
+//		int[] two = {sTwo.charAt(0), sTwo.charAt(1)};
+//		int[] three = {sThree.charAt(0), sThree.charAt(1)};
+//		if (playerNum != lock)
+//			return 2;
 		if (remove(one, two, three)) {
 			deal(3);
 			while (allSets.size() == 0) {
 				deal(3);
 			}
-			players.get(playerNum).increment(1);
-			lock = -1;
+			p.increment(1);
+			lock = null;
 			lockTimer.stop();
-			return true;
+
+            System.out.println("SETS");
+            for (CardSet s : allSets) {
+                System.out.println(s.toString());
+            }
+
+			return 0;
 		}
-		players.get(playerNum).increment(-1);
-		return false;
+		p.increment(-1);
+		return 1;
 	}
 
 	private boolean remove(int[] one, int[] two, int[] three) {
@@ -127,13 +153,26 @@ public class Game {
 		return true;
 	}
 
+    public boolean removePlayer(String player) {
+        Player a = null;
+        for (Player p : this.getPlayers()) {
+            if (p.getName().equals(player)) {
+                a = p;
+            }
+        }
+        if (a == null)
+            return false;
+        this.getPlayers().remove(a);
+        return true;
+    }
+
 	private void remove(int[] loc) {
 		Card removeCard = board.get(loc[0], loc[1]);
 		board.remove(removeCard);
 		for (Iterator<CardSet> i = allSets.iterator(); i.hasNext();) {
 			CardSet element = i.next();
 			if (element.contains(removeCard)) {
-				System.out.println(removeCard + " removing " + element);
+//				System.out.println(removeCard + " removing " + element);
 				i.remove();
 			}
 		}
@@ -169,7 +208,8 @@ public class Game {
 		return players;
 	}
 
-	public void addPlayer(String p) {
+	public void addPlayer(String p, ServerMultiThread smt) {
+        this.threads.add(smt);
 		this.players.add(new Player(p));
 	}
 
@@ -177,7 +217,7 @@ public class Game {
 		this.players.remove(new Player(p));
 	}
 
-	public int getLock() {
+	public String getLock() {
 		return lock;
 	}
 
@@ -203,27 +243,5 @@ public class Game {
 			s += c.toString();
 		}
 		return s+":";
-	}
-
-	public static void main(String[] args) {
-		Game game = new Game("game", "Gordon", 5, Database.hash("1234"));
-		Scanner s = new Scanner(System.in);
-		System.out.println("Removing");
-		String one =    "01";
-		String two =    "00";
-		String three =  "20";
-		System.out.println(game.board.get(0, 1));
-		game.lock(0);
-		game.replace(one, two, three, 0);
-		System.out.println("Removed");
-		System.out.println(game.board);
-		for (CardSet set : game.allSets) {
-			System.out.println(set);
-		}
-		while (s.hasNext()) {
-			s.nextLine();
-			game.lock(5);
-		}
-		s.close();
 	}
 }

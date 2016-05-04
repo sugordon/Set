@@ -28,4 +28,9 @@ public class Player {
     public void increment(int s) {
         score += s;
     }
+
+    @Override
+    public String toString() {
+        return this.name;
+    }
 }

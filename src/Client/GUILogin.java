@@ -166,6 +166,7 @@ public class GUILogin extends JPanel{
                 }
                 if(tokens[1].equals("SUCCESS")){
                     if (tokens[2].equals("LOBBY")){
+                        ClientInit.game.myUN = userText.getText();
                         ClientInit.STATE = ClientInit.LOBBY;
                         ClientInit.switchStates(ClientInit.LOGIN,ClientInit.LOBBY);
                     }

@@ -46,7 +46,6 @@ public class ServerMultiThread extends Thread {
             outStream.println(out);
             System.out.println("TEST0");
             while ((in = inStream.readLine()) != null) {
-                System.out.println("WHILE");
                 out = io.processInput(in);
                 if (out.equals("END_CONN")) {
                     this.close();
@@ -66,6 +65,8 @@ public class ServerMultiThread extends Thread {
 
     private void close() {
         ServerInit.allThreads.remove(this.current_player);
+        if (this.current_game.removePlayer(this.current_player) == false)
+            System.out.println("ERROR REMOVING PLAYER");
         outStream.close();
         try {
             inStream.close();

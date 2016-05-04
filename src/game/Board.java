@@ -41,13 +41,17 @@ public class Board implements Iterable<Card> {
 
 	public int[] find(Card c) {
 		int[] ans = new int[2];
-		for (ans[0] = 0; ans[0] < maxRow + 1; ans[0]++) {
+		for (ans[0] = 0; ans[0] < 7; ans[0]++) {
 			for (ans[1] = 0; ans[1] < 3; ans[1]++) {
-				if (board[ans[0]][ans[1]] == c) {
+                if (board[ans[0]][ans[1]] == null) {
+                    continue;
+                }
+				if (board[ans[0]][ans[1]].equals(c)) {
 					return ans;
 				}
 			}
 		}
+		System.out.println(c.toString() + " is null");
 		return null;
 	}
 
@@ -90,6 +94,13 @@ public class Board implements Iterable<Card> {
 				}
 				return retCard;
 			}};
+	}
+	public void removeAll() {
+        for (int index = 0; index < board.length; index++) {
+            for (int inner = 0; inner < board[index].length; inner++) {
+                board[index][inner] = null;
+            }
+        }
 	}
 	@Override
 	public String toString() {

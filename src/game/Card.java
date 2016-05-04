@@ -7,10 +7,11 @@ public class Card extends JToggleButton{
 	final int symbol;
 	final int shading;
 	final int color;
+
     final int hash;
 
     public Card(String input) {
-        this(input.charAt(0) - '0', input.charAt(1) - '0', input.charAt(2) - '0', input.charAt(2) - '0');
+        this(input.charAt(0) - '0', input.charAt(1) - '0', input.charAt(2) - '0', input.charAt(3) - '0');
     }
 
 	public Card(int num, int sym, int sha, int col) {
@@ -28,7 +29,7 @@ public class Card extends JToggleButton{
 
     @Override
     public boolean equals(Object o) {
-        return o.hashCode() == this.hashCode();
+        return o != null && o.hashCode() == this.hashCode();
     }
 	
 	@Override

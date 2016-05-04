@@ -1,6 +1,7 @@
 package game;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class CardSet {
 	ArrayList<Card> set = new ArrayList<Card>(3);
@@ -9,8 +10,24 @@ public class CardSet {
 		set.add(one);
 		set.add(two);
 		set.add(three);
+		set.sort(new Comparator<Card>() {
+			@Override
+			public int compare(Card o1, Card o2) {
+				return o1.hashCode() - o2.hashCode();
+			}
+		});
 	}
-	
+
+	@Override
+	public int hashCode() {
+		return set.get(0).hashCode()*1000*1000 + set.get(1).hashCode()*1000 + set.get(2).hashCode();
+	}
+
+    @Override
+    public boolean equals(Object o) {
+        return o != null && o.hashCode() == this.hashCode();
+    }
+
 	public boolean contains(Card c) {
 		return set.contains(c);
 	}
