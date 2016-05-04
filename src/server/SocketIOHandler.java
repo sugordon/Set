@@ -45,11 +45,16 @@ public class SocketIOHandler{
             case LOGIN:
                 if(s[0].equals("LOGIN")){
                     if(Database.auth(s[1],s[2])) {
-                        output = "ACK_LOGIN,SUCCESS,LOBBY";
-                        state = LOBBY;
-                        _thread.setPlayer(s[1]);
+                        if(ServerInit.allThreads.containsKey(s[1])){
+                            output = "ACK_LOGIN,FAILURE,LOGIN";
+                        }
+                        else {
+                            output = "ACK_LOGIN,SUCCESS,LOBBY";
+                            state = LOBBY;
+                            _thread.setPlayer(s[1]);
 //                        System.out.println("SET PLAYER TO "+s[1]);
-                        ServerInit.allThreads.put(s[1], _thread);
+                            ServerInit.allThreads.put(s[1], _thread);
+                        }
                     }
                     else {
                         output = "ACK_LOGIN,FAILURE,LOGIN";
